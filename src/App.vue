@@ -11,7 +11,10 @@ import Stats from "./components/views/Stats.vue";
 import Calendar from "./components/views/Calendar.vue";
 import Subjects from "./components/views/Subjects.vue";
 import Records from "./components/views/Records.vue";
+import PerfilDialog from "./components/PerfilDialog.vue";
+import { User } from "lucide-vue-next";
 
+const perfil = ref<InstanceType<typeof PerfilDialog> | null>(null)
 const views: Record<string, Component> = {
   registros: Records,
   inicio: Home,
@@ -48,17 +51,24 @@ provide("navegar", (tab: string) => {
       <h2 class="app-title">caso_base</h2>
     </div>
 
-    <button
-      type="button"
-      class="subjects-button"
-      :class="{ active: activeTab === 'subjects' }"
-      aria-label="Materias"
-      :aria-current="activeTab === 'subjects' ? 'page' : undefined"
-      @click="activeTab = 'subjects'"
-    >
-      <BookText :size="20" :stroke-width="1.8" aria-hidden="true" />
-      <span>Materias</span>
-    </button>
+    <div class="app-acciones">
+      <button
+        type="button"
+        class="subjects-button"
+        :class="{ active: activeTab === 'subjects' }"
+        aria-label="Materias"
+        :aria-current="activeTab === 'subjects' ? 'page' : undefined"
+        @click="activeTab = 'subjects'"
+      >
+        <BookText :size="20" :stroke-width="1.8" aria-hidden="true" />
+        <span>Materias</span>
+      </button>
+
+      <button type="button" class="subjects-button" aria-label="Ver perfil" aria-haspopup="dialog" @click="perfil?.abrir()">
+        <User :size="20" :stroke-width="1.8" aria-hidden="true" />
+        <span>Perfil</span>
+      </button>
+    </div>
   </header>
   <main class="view-container">
     <KeepAlive>
@@ -66,6 +76,7 @@ provide("navegar", (tab: string) => {
     </KeepAlive>
   </main>
   <bottomNavigation v-model="activeTab"></bottomNavigation>
+  <PerfilDialog ref="perfil" />
   <CreditosDialog ref="creditos" />
 </template>
 
@@ -111,6 +122,12 @@ provide("navegar", (tab: string) => {
   font-family: "Monocraft", ui-monospace, monospace;
   font-weight: 400;
   letter-spacing: 0;
+}
+
+.app-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .subjects-button {
