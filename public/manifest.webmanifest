@@ -8,7 +8,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#e3b526",
+  "theme_color": "#1a1917",
   "icons": [
     {
       "src": "/icons/logo_cb.svg",

@@ -157,8 +157,7 @@ provide("navegar", (tab: string) => {
 }
 .view-container {
   flex: 1;
-  /* Deja lugar debajo de la barra inferior fija (64px + safe area). */
-  padding: 1rem 1rem calc(1rem + 64px + env(safe-area-inset-bottom));
+  padding: 1rem;
   text-align: left;
   min-width: 0;
   display: flex;
@@ -177,6 +176,13 @@ provide("navegar", (tab: string) => {
 .vista > * {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+/* Espacio debajo de la barra fija. Va como contenido (no como padding) para que
+   también quede al final cuando la pantalla scrollea. */
+.vista::after {
+  content: '';
+  flex: 0 0 calc(64px + env(safe-area-inset-bottom) + 1rem);
 }
 
 /* En celulares angostos el logo, el título y dos botones con texto no entran en una fila. */
