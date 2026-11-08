@@ -23,6 +23,10 @@
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
   --on-accent: #1a1a1a;
+  /* Trazo firme para bordes y sombras de botones: da peso sin cambiar la paleta. */
+  --trazo: color-mix(in srgb, var(--text-h) 22%, #fff);
+  --radio-control: 8px;
+  --radio-tarjeta: 12px;
   --peligro: #c62828;
   --surface: color-mix(in srgb, var(--brand) 9%, #fff);
   --calor-0: #f1f1f1;
@@ -94,6 +98,16 @@ body {
   margin: 0;
 }
 
+/* Títulos en monoespaciada legible; Monocraft queda solo para el nombre de la app. */
+h1,
+h2,
+h3 {
+  font-family: "Ubuntu Mono", ui-monospace, monospace;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-h);
+}
+
 /* Componentes compartidos de Pomodoro, Estadísticas y Registros */
 .btn {
   display: inline-flex;
@@ -101,33 +115,34 @@ body {
   justify-content: center;
   gap: 0.4rem;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  border: 1.5px solid var(--trazo);
+  border-radius: var(--radio-control);
   background: var(--bg);
   color: var(--text-h);
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.2;
+  box-shadow: 0 2px 0 var(--trazo);
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.1s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
-.btn:hover:not(:disabled) { border-color: var(--text-h); }
-.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn:hover:not(:disabled) { border-color: var(--text-h); box-shadow: 0 2px 0 var(--text-h); }
+.btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 var(--trazo); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn:focus-visible,
 .pildora:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.btn-primario { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.btn-primario:hover:not(:disabled) { border-color: var(--accent-text); }
-.btn-peligro { background: var(--peligro); border-color: var(--peligro); color: #fff; }
-.btn-peligro:hover:not(:disabled) { border-color: var(--text-h); }
+.btn-primario { background: var(--accent); border-color: var(--text-h); color: var(--on-accent); box-shadow: 0 2px 0 var(--text-h); }
+.btn-primario:hover:not(:disabled) { border-color: var(--text-h); background: color-mix(in srgb, var(--accent) 88%, #fff); }
+.btn-peligro { background: var(--peligro); border-color: var(--peligro); color: #fff; box-shadow: 0 2px 0 color-mix(in srgb, var(--peligro) 60%, #000); }
+.btn-peligro:hover:not(:disabled) { border-color: var(--text-h); box-shadow: 0 2px 0 var(--text-h); }
 .btn-grande { padding: 0.8rem 1.6rem; font-size: 1rem; }
 .btn-icono { padding: 0.45rem; border-radius: 50%; }
 .btn-fantasma { border-color: transparent; background: transparent; }
 
 .tarjeta {
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  border: 1.5px solid var(--trazo);
+  border-radius: var(--radio-tarjeta);
   background: var(--bg);
   padding: 1rem;
   box-sizing: border-box;
@@ -154,8 +169,8 @@ body {
   font-size: 0.95rem;
   font-weight: 400;
   padding: 0.55rem 0.7rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 1.5px solid var(--trazo);
+  border-radius: var(--radio-control);
   background: var(--bg);
   color: var(--text-h);
   color-scheme: light;
@@ -170,9 +185,9 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.4rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  border: 1.5px solid var(--trazo);
+  border-radius: 6px;
   background: transparent;
   color: var(--text-h);
   font: inherit;

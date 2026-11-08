@@ -40,7 +40,7 @@ const errores = computed(() =>
   store.seleccionadas.filter(m => store.overviewsError[m.id]).map(m => m.name),
 )
 
-const vista = ref<Vista>(window.innerWidth < 640 ? 'dia' : 'semana')
+const vista = ref<Vista>('semana')
 const fecha = ref(new Date())
 const ahora = ref(new Date())
 const temporizador = window.setInterval(() => (ahora.value = new Date()), 60_000)
@@ -234,7 +234,7 @@ const superpuestoCon = computed(() => {
 
       <div class="barra">
         <div class="navegacion">
-          <button type="button" class="boton" @click="fecha = new Date()">Hoy</button>
+          <button type="button" class="boton" @click="abrirDia(new Date())">Hoy</button>
           <button type="button" class="icono" aria-label="Anterior" @click="mover(-1)">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6" /></svg>
           </button>

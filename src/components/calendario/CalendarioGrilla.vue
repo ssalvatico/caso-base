@@ -218,17 +218,73 @@ function etiqueta(e: EventoCalendario): string {
 @media (max-width: 719px) {
   .grilla {
     max-height: calc(100dvh - 280px);
-    scroll-padding-left: 3.25rem;
+    scroll-padding-left: 2.25rem;
   }
 
   .evento {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
+
+  /* Los 7 días entran en el ancho del celular: sin scroll horizontal. */
+  .interna.multiple {
+    min-width: 0;
+  }
+
+  .cabecera,
+  .cuerpo {
+    grid-template-columns: 2.25rem repeat(var(--cols), minmax(0, 1fr));
+  }
+
+  .cab-dia {
+    padding: 0.4rem 0;
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+
+  .numero {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 14px;
+  }
+
+  .hora {
+    right: 0.25rem;
+    font-size: 9px;
+  }
+
+  .evento {
+    padding: 3px 2px;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .evento-titulo {
+    gap: 2px;
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+
+  /* El horario exacto y el aula se ven al tocar el bloque (DetalleEvento). */
+  .evento-hora,
+  .evento-aula {
+    display: none;
+  }
+
+  .icono-alerta {
+    width: 10px;
+    height: 10px;
+  }
+
+  .estudio {
+    width: 3px;
+  }
 }
 
-.interna.multiple {
-  min-width: 640px;
+@media (min-width: 720px) {
+  .interna.multiple {
+    min-width: 640px;
+  }
 }
 
 .cabecera,

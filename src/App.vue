@@ -87,7 +87,7 @@ provide("navegar", (tab: string) => {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--text-h);
 }
 
 .app-brand {
@@ -155,7 +155,46 @@ provide("navegar", (tab: string) => {
 }
 .view-container {
   flex: 1;
-  padding: 1rem;
+  /* Deja lugar debajo de la barra inferior fija (64px + safe area). */
+  padding: 1rem 1rem calc(1rem + 64px + env(safe-area-inset-bottom));
   text-align: left;
+  min-width: 0;
+}
+
+/* En celulares angostos el logo, el título y dos botones con texto no entran en una fila. */
+@media (max-width: 479px) {
+  .app-header {
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .app-brand {
+    gap: 0.4rem;
+    min-width: 0;
+  }
+
+  .app-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-acciones {
+    flex-shrink: 0;
+    gap: 0.4rem;
+  }
+
+  /* Solo íconos; ambos botones conservan su aria-label. */
+  .subjects-button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .subjects-button span {
+    display: none;
+  }
 }
 </style>

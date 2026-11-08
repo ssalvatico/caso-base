@@ -78,10 +78,13 @@ import {
 </template>
 
 <style scoped>
+/* Fija al borde inferior del viewport: no depende del alto de #app (svh/dvh),
+   así no se despega cuando el navegador móvil oculta o muestra su barra. */
 .bottom-navigation {
-  position: sticky;
+  position: fixed;
+  left: 0;
+  right: 0;
   bottom: 0;
-  margin-top: auto;
   z-index: 1000;
 
   display: flex;
@@ -90,14 +93,15 @@ import {
 
   flex-shrink: 0;
   box-sizing: border-box;
-  height: 64px;
+  height: calc(64px + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
 
   background: var(--bg);
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--text-h);
 }
 
 .nav-item {
+  position: relative;
   flex: 1;
   height: 100%;
 
@@ -129,8 +133,19 @@ import {
 }
 
 .nav-item.active {
-  color: var(--accent-text);
+  color: var(--text-h);
   font-weight: 600;
+}
+
+/* La pestaña activa se marca con una franja de color en el borde superior. */
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 25%;
+  right: 25%;
+  height: 4px;
+  background: var(--accent);
 }
 
 /* Estilo de realce para el botón de Inicio */

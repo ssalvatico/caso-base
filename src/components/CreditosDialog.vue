@@ -99,7 +99,7 @@ defineExpose({ abrir })
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  font-family: "Monocraft", ui-monospace, monospace;
+  font-family: "Ubuntu Mono", ui-monospace, monospace;
 }
 
 .creditos-lista a {
