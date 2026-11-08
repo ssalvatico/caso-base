@@ -339,6 +339,8 @@ const superpuestoCon = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .sr-only {

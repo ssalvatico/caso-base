@@ -4,7 +4,12 @@ import { Check } from 'lucide-vue-next'
 import type { MateriaEstudio } from '../../utils/estudio'
 import Modal from './Modal.vue'
 
-const props = defineProps<{ materias: MateriaEstudio[]; seleccion: number | null }>()
+const props = defineProps<{
+  materias: MateriaEstudio[]
+  seleccion: number | null
+  // Opción que se muestra arriba, sin encabezado de año (por ejemplo, el comodín).
+  destacada?: MateriaEstudio
+}>()
 const emit = defineEmits<{ elegir: [id: number] }>()
 const abierto = defineModel<boolean>('abierto', { default: false })
 
@@ -21,6 +26,25 @@ function elegir(id: number) {
 
 <template>
   <Modal v-model:abierto="abierto" titulo="Elegí una materia" descripcion="El tiempo de foco se registra en la materia elegida.">
+    <section v-if="destacada" class="grupo" aria-label="Sin materia asignada">
+      <ul role="listbox" aria-label="Sin materia asignada">
+        <li>
+          <button
+            type="button"
+            role="option"
+            class="opcion"
+            :class="{ elegida: destacada.id === seleccion }"
+            :aria-selected="destacada.id === seleccion"
+            @click="elegir(destacada.id)"
+          >
+            <span class="muestra" :style="{ background: destacada.color }" aria-hidden="true" />
+            <span class="nombre">{{ destacada.nombre }}</span>
+            <Check v-if="destacada.id === seleccion" :size="18" aria-hidden="true" />
+          </button>
+        </li>
+      </ul>
+    </section>
+
     <div class="grupos">
       <section v-for="g in grupos" :key="g.anio" class="grupo" :aria-labelledby="`anio-${g.anio}`">
         <h4 :id="`anio-${g.anio}`">{{ g.anio }}° año</h4>

@@ -8,6 +8,15 @@ export interface MateriaEstudio {
   color: string
 }
 
+// Opción para estudiar sin materia asignada. Vive solo en el Pomodoro y en los registros.
+export const MATERIA_COMODIN: MateriaEstudio = {
+  id: 0,
+  nombre: 'Comodín',
+  corto: 'Comodín',
+  anio: 0,
+  color: '#8a93a6',
+}
+
 export interface Sesion {
   id: number
   materiaId: number
@@ -98,14 +107,16 @@ export function diasEnMes(anio: number, mes: number): number {
   return new Date(anio, mes + 1, 0).getDate()
 }
 
+// hh:mm para totales de foco (siempre dos dígitos en las horas: 01:37).
 export function hmm(seg: number): string {
   const m = Math.round(seg / 60)
-  return `${Math.floor(m / 60)}:${pad(m % 60)}`
+  return `${pad(Math.floor(m / 60))}:${pad(m % 60)}`
 }
 
+// hh:mm:ss para cronómetros y valores con segundos. Se distingue de hmm por los segundos.
 export function hmmss(seg: number): string {
   const s = Math.round(seg)
-  return `${Math.floor(s / 3600)}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`
+  return `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`
 }
 
 export function horasMinutos(seg: number): string {

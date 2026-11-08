@@ -216,8 +216,11 @@ function etiqueta(e: EventoCalendario): string {
 }
 
 @media (max-width: 719px) {
+  /* La grilla ocupa el espacio que sobra debajo de la barra de navegación del calendario. */
   .grilla {
-    max-height: calc(100dvh - 280px);
+    flex: 1 1 auto;
+    max-height: none;
+    min-height: 220px;
     scroll-padding-left: 2.25rem;
   }
 

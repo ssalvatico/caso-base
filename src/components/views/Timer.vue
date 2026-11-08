@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount, reactive, ref } from 'vue'
-import { Check, ChevronDown, FastForward, Pause, Pencil, Play, SkipForward, Square } from 'lucide-vue-next'
+import { Check, ChevronDown, Pause, Pencil, Play, SkipForward, Square } from 'lucide-vue-next'
 import { useEstudioStore } from '../../stores/estudio'
-import { clave, hmm, hmmss, horasMinutos, pad, reloj, type ConfigPomodoro, type Sesion } from '../../utils/estudio'
+import { clave, hmm, hmmss, horasMinutos, MATERIA_COMODIN, pad, reloj, type ConfigPomodoro, type Sesion } from '../../utils/estudio'
 import RelojCircular from '../estudio/RelojCircular.vue'
 import SelectorMateria from '../estudio/SelectorMateria.vue'
 import EditorIntervalos from '../estudio/EditorIntervalos.vue'
@@ -26,7 +26,6 @@ const faseTranscurrido = ref(0)
 const focoAcumulado = ref(0)
 const totalTranscurrido = ref(0)
 const inicio = ref<Date | null>(null)
-const velocidad = ref(1)
 const ultima = ref<Sesion | null>(null)
 
 const menuAbierto = ref(false)
@@ -53,7 +52,7 @@ function tick() {
   }
   if (estado.value !== 'corriendo') return
 
-  let avance = dt * velocidad.value
+  let avance = dt
   totalTranscurrido.value += avance
   if (modo.value === 'cronometro') {
     focoAcumulado.value += avance
@@ -286,7 +285,7 @@ const hoyPorMateria = computed(() => {
       <span class="muestra" :style="{ background: materia?.color ?? 'var(--calor-0)' }" aria-hidden="true" />
       <span class="texto">
         <span class="nombre">{{ materia ? materia.nombre : 'Elegí una materia' }}</span>
-        <span class="sub">{{ materia ? `${materia.anio}° año` : 'Necesaria para iniciar' }}</span>
+        <span class="sub">{{ materia ? (materia.id === MATERIA_COMODIN.id ? 'Sin materia asignada' : `${materia.anio}° año`) : 'Necesaria para iniciar' }}</span>
       </span>
       <ChevronDown :size="18" aria-hidden="true" />
     </button>
@@ -338,15 +337,6 @@ const hoyPorMateria = computed(() => {
     </div>
 
     <div class="pie">
-      <button
-        type="button"
-        class="pildora"
-        :class="{ activa: velocidad === 60 }"
-        :aria-pressed="velocidad === 60"
-        @click="velocidad = velocidad === 60 ? 1 : 60"
-      >
-        <FastForward :size="15" aria-hidden="true" /> Avance rápido ×60
-      </button>
       <span class="hoy num">Hoy: <strong>{{ hmm(hoyTotal) }}</strong> de foco</span>
     </div>
 
@@ -361,6 +351,7 @@ const hoyPorMateria = computed(() => {
     <SelectorMateria
       v-model:abierto="selectorAbierto"
       :materias="store.materias"
+      :destacada="MATERIA_COMODIN"
       :seleccion="materiaId"
       @elegir="elegirMateria"
     />
@@ -373,10 +364,41 @@ const hoyPorMateria = computed(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-evenly;
+  gap: 0.75rem;
   max-width: 440px;
+  width: 100%;
   margin: 0 auto;
-  padding-top: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+/* Pantallas bajas: se compacta todo para que la pestaña no necesite scroll. */
+@media (max-height: 760px) {
+  .timer {
+    gap: 0.5rem;
+  }
+
+  /* La configuración se edita con el lápiz; en pantallas bajas no ocupa lugar. */
+  .config {
+    display: none;
+  }
+
+  .selector-materia {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .controles .btn-grande {
+    padding: 0.55rem 1.1rem;
+    font-size: 0.95rem;
+  }
+
+  .pie {
+    padding-top: 0.5rem;
+  }
+
+  .hoy-materias {
+    display: none;
+  }
 }
 
 .cabecera {
@@ -630,10 +652,6 @@ const hoyPorMateria = computed(() => {
   padding-top: 0.75rem;
   border-top: 1px solid var(--border);
   font-size: 0.85rem;
-}
-
-.pie .pildora {
-  font-size: 0.8rem;
 }
 
 .hoy strong {

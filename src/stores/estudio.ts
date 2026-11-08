@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { MATERIAS_ESTUDIO } from '../data/materiasEstudio'
-import { agruparPorDia, type MateriaEstudio, type Sesion } from '../utils/estudio'
+import { agruparPorDia, MATERIA_COMODIN, type MateriaEstudio, type Sesion } from '../utils/estudio'
 import { refPersistido, siguienteId as calcularSiguienteId } from '../utils/persistencia'
 
 export type DatosSesion = Omit<Sesion, 'id'>
@@ -35,7 +35,8 @@ export const useEstudioStore = defineStore('estudio', () => {
   const edicionPendiente = ref<number | null>(null)
   let siguienteId = calcularSiguienteId(sesiones.value)
 
-  const materiaPorId = computed(() => new Map(materias.map(m => [m.id, m])))
+  // El comodín (id 0) se resuelve igual que una materia, así sus sesiones tienen nombre.
+  const materiaPorId = computed(() => new Map([MATERIA_COMODIN, ...materias].map(m => [m.id, m] as const)))
   const porDia = computed(() => agruparPorDia(sesiones.value))
   const ordenadas = computed(() =>
     [...sesiones.value].sort((a, b) => b.fecha.localeCompare(a.fecha) || b.inicio - a.inicio),

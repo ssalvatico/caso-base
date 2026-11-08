@@ -71,9 +71,11 @@ provide("navegar", (tab: string) => {
     </div>
   </header>
   <main class="view-container">
-    <KeepAlive>
-      <component :is="activeView" :key="activeTab" />
-    </KeepAlive>
+    <div class="vista">
+      <KeepAlive>
+        <component :is="activeView" :key="activeTab" />
+      </KeepAlive>
+    </div>
   </main>
   <bottomNavigation v-model="activeTab"></bottomNavigation>
   <PerfilDialog ref="perfil" />
@@ -158,6 +160,22 @@ provide("navegar", (tab: string) => {
   /* Deja lugar debajo de la barra inferior fija (64px + safe area). */
   padding: 1rem 1rem calc(1rem + 64px + env(safe-area-inset-bottom));
   text-align: left;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Ocupa el alto que deja el encabezado; las pantallas pueden repartirlo. */
+.vista {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.vista > * {
+  flex: 1 1 auto;
   min-width: 0;
 }
 

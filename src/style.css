@@ -88,7 +88,9 @@ code {
   width: 100%;
   margin: 0;
   text-align: center;
-  min-height: 100svh;
+  /* dvh: ocupa todo el alto visible aunque el navegador oculte sus barras.
+     Altura fija (no mínima) para que las pantallas puedan repartir ese espacio. */
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;

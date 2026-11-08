@@ -57,7 +57,8 @@ const marcas = Array.from({ length: 60 }, (_, i) => i)
 <style scoped>
 .reloj {
   display: grid;
-  width: min(78vw, 300px);
+  /* Además del ancho, se limita por el alto visible para que la pantalla entere sin scroll. */
+  width: min(78vw, 300px, 32dvh);
   aspect-ratio: 1;
   margin: 0 auto;
 }
