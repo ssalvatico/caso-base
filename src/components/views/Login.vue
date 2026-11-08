@@ -141,7 +141,8 @@ async function enviar() {
 </script>
 
 <template>
-  <main class="login">
+  <main class="login-pagina">
+    <section class="login-tarjeta">
     <div class="marca">
       <AppLogo class="marca-logo" />
       <h1>caso_base</h1>
@@ -239,18 +240,43 @@ async function enviar() {
 
     <p v-if="aviso" class="aviso" role="status">{{ aviso }}</p>
     <p v-if="error" class="error" role="alert">{{ error }}</p>
+    </section>
   </main>
 </template>
 
 <style scoped>
-.login {
+/*
+ * Personalización de la tarjeta de ingreso.
+ * Cambiá los valores de estas variables; no hace falta tocar nada más.
+ */
+.login-pagina {
+  --login-ancho: 350px;        /* ancho máximo de la tarjeta */
+  --login-relleno: 1.5rem;     /* espacio interno */
+  --login-radio: 14px;         /* esquinas redondeadas */
+  --login-borde: var(--trazo); /* color del borde */
+  --login-fondo: var(--bg);    /* fondo de la tarjeta */
+  --login-sombra: 5px 4px 0 var(--trazo); /* sombra; '' para quitarla */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  padding: 1rem;
+}
+
+.login-tarjeta {
+  box-sizing: border-box;
+  width: min(100%, var(--login-ancho));
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 0.9rem;
-  width: 100%;
-  max-width: 340px;
-  margin: 2.5rem auto 0;
+  padding: var(--login-relleno);
+  border: 1.5px solid var(--login-borde);
+  border-radius: var(--login-radio);
+  background: var(--login-fondo);
+  box-shadow: var(--login-sombra);
   text-align: left;
 }
 
@@ -269,7 +295,7 @@ async function enviar() {
 }
 
 /* El nombre de la app es el único lugar donde va Monocraft. */
-.login h1 {
+.login-tarjeta h1 {
   margin: 0;
   font-family: "Monocraft", ui-monospace, monospace;
   font-weight: 400;
@@ -354,7 +380,7 @@ async function enviar() {
   border-top: 1px solid var(--trazo);
 }
 
-.login > .btn {
+.login-tarjeta > .btn {
   width: 100%;
 }
 

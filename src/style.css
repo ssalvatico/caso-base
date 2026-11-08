@@ -98,6 +98,8 @@ code {
 
 body {
   margin: 0;
+  /* Evita que arrastrar hacia abajo en la parte superior recargue la app instalada. */
+  overscroll-behavior-y: none;
 }
 
 /* Títulos en monoespaciada legible; Monocraft queda solo para el nombre de la app. */

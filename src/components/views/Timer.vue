@@ -233,7 +233,7 @@ const hoyPorMateria = computed(() => {
 </script>
 
 <template>
-  <section class="timer" aria-labelledby="timer-title">
+  <section class="timer" :class="{ finalizado: estado === 'finalizado' }" aria-labelledby="timer-title">
     <div class="cabecera">
       <div class="modo" @focusout="cerrarMenu">
         <button
@@ -372,10 +372,33 @@ const hoyPorMateria = computed(() => {
   padding-top: 0.25rem;
 }
 
+@media (max-height: 700px) {
+  .timer {
+    gap: 0.4rem;
+    padding-top: 0;
+  }
+}
+
+/* Con la sesión guardada, la tarjeta ya muestra el resumen: el reloj se achica. */
+.timer.finalizado :deep(.reloj) {
+  width: min(60vw, 220px, 21dvh);
+}
+
 /* Pantallas bajas: se compacta todo para que la pestaña no necesite scroll. */
-@media (max-height: 760px) {
+@media (max-height: 900px) {
   .timer {
     gap: 0.5rem;
+  }
+
+  /* La tarjeta de sesión guardada suma filas; se compacta para no empujar la pantalla. */
+  .guardada {
+    padding: 0.6rem 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .acciones .btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.82rem;
   }
 
   /* La configuración se edita con el lápiz; en pantallas bajas no ocupa lugar. */

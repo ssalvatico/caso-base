@@ -185,6 +185,13 @@ provide("navegar", (tab: string) => {
   flex: 0 0 calc(64px + env(safe-area-inset-bottom) + 1rem);
 }
 
+/* En pantallas bajas el aire extra se quita para que Pomodoro entre sin scroll. */
+@media (max-height: 700px) {
+  .vista::after {
+    flex-basis: calc(64px + env(safe-area-inset-bottom));
+  }
+}
+
 /* En celulares angostos el logo, el título y dos botones con texto no entran en una fila. */
 @media (max-width: 479px) {
   .app-header {
