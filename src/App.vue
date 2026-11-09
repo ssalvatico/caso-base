@@ -89,7 +89,7 @@ provide("navegar", (tab: string) => {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  border-bottom: 2px solid var(--text-h);
+  border-bottom: 2px solid var(--border);
 }
 
 .app-brand {

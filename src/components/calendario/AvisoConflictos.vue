@@ -60,10 +60,10 @@ const emit = defineEmits<{
   align-items: flex-start;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border: 1px solid #f2b8ba;
+  border: 1px solid var(--aviso-borde);
   border-radius: 10px;
-  background: #fdecec;
-  color: #5c1a1c;
+  background: var(--aviso-fondo);
+  color: var(--aviso-texto);
   font-size: 14px;
 }
 
@@ -107,7 +107,7 @@ const emit = defineEmits<{
   padding: 0;
   border: 0;
   background: none;
-  color: #a1161b;
+  color: var(--aviso-texto);
   font: inherit;
   text-decoration: underline;
   cursor: pointer;

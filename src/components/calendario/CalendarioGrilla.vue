@@ -466,8 +466,8 @@ function etiqueta(e: EventoCalendario): string {
   flex: none;
   width: 14px;
   height: 14px;
-  fill: #ffd8d9;
-  stroke: #7a1216;
+  fill: var(--examen-relleno);
+  stroke: var(--examen-trazo);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;

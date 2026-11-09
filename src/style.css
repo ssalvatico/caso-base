@@ -36,6 +36,13 @@
   --calor-4: var(--brand);
   --calor-5: color-mix(in srgb, var(--brand) 78%, #000);
 
+  /* Avisos y marcadores de examen del calendario. */
+  --aviso-fondo: #fdecec;
+  --aviso-texto: #5c1a1c;
+  --aviso-borde: #f2b8ba;
+  --examen-relleno: #ffd8d9;
+  --examen-trazo: #7a1216;
+
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -48,6 +55,62 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 
+}
+
+/*
+ * Modo oscuro. Se aplica si el sistema está en oscuro (y el usuario no eligió claro),
+ * o si el usuario eligió oscuro en Perfil. Los dos bloques son iguales a propósito.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --text: #c4c6cc;
+    --text-h: #f2f2f5;
+    --bg: #15161a;
+    --border: color-mix(in srgb, var(--brand) 30%, #15161a);
+    --code-bg: color-mix(in srgb, var(--brand) 14%, #15161a);
+    --accent-text: color-mix(in srgb, var(--brand) 88%, #fff);
+    --shadow: rgba(0, 0, 0, 0.5) 0 10px 15px -3px, rgba(0, 0, 0, 0.35) 0 4px 6px -2px;
+    --trazo: color-mix(in srgb, var(--text-h) 22%, #15161a);
+    --surface: color-mix(in srgb, var(--brand) 12%, #15161a);
+    --calor-0: #2a2c33;
+    --calor-1: color-mix(in srgb, var(--brand) 30%, #15161a);
+    --calor-2: color-mix(in srgb, var(--brand) 50%, #15161a);
+    --calor-3: color-mix(in srgb, var(--brand) 72%, #15161a);
+    --calor-5: color-mix(in srgb, var(--brand) 85%, #fff);
+    --aviso-fondo: #3a1517;
+    --aviso-texto: #ffd7d9;
+    --aviso-borde: #7a2a2e;
+    --examen-relleno: #5a1c1f;
+    --examen-trazo: #ffb3b6;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --text: #c4c6cc;
+  --text-h: #f2f2f5;
+  --bg: #15161a;
+  --border: color-mix(in srgb, var(--brand) 30%, #15161a);
+  --code-bg: color-mix(in srgb, var(--brand) 14%, #15161a);
+  --accent-text: color-mix(in srgb, var(--brand) 88%, #fff);
+  --shadow: rgba(0, 0, 0, 0.5) 0 10px 15px -3px, rgba(0, 0, 0, 0.35) 0 4px 6px -2px;
+  --trazo: color-mix(in srgb, var(--text-h) 22%, #15161a);
+  --surface: color-mix(in srgb, var(--brand) 12%, #15161a);
+  --calor-0: #2a2c33;
+  --calor-1: color-mix(in srgb, var(--brand) 30%, #15161a);
+  --calor-2: color-mix(in srgb, var(--brand) 50%, #15161a);
+  --calor-3: color-mix(in srgb, var(--brand) 72%, #15161a);
+  --calor-5: color-mix(in srgb, var(--brand) 85%, #fff);
+  --aviso-fondo: #3a1517;
+  --aviso-texto: #ffd7d9;
+  --aviso-borde: #7a2a2e;
+  --examen-relleno: #5a1c1f;
+  --examen-trazo: #ffb3b6;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 
 code,

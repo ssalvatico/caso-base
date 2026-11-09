@@ -3,6 +3,13 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { X } from 'lucide-vue-next'
 import { supabase } from '../lib/supabase'
+import { guardarTema, leerTema, opcionesTema, type Tema } from '../lib/tema'
+
+const tema = ref<Tema>(leerTema())
+function elegirTema(nuevo: Tema) {
+  tema.value = nuevo
+  guardarTema(nuevo)
+}
 
 const router = useRouter()
 const dialog = ref<HTMLDialogElement | null>(null)
@@ -59,6 +66,7 @@ function cerrarSiClickFuera(event: MouseEvent) {
 }
 
 defineExpose({ abrir })
+import { Sun, Moon } from "lucide-vue-next";
 </script>
 <template>
   <dialog ref="dialog" class="perfil" aria-labelledby="perfil-titulo" @click="cerrarSiClickFuera">
@@ -70,6 +78,28 @@ defineExpose({ abrir })
 			<hr/>
       <p v-if="nombre"><strong>{{ nombre }}</strong></p>
       <p>{{ email }}</p>
+      <div class="apariencia" role="group" aria-label="Apariencia">
+        <div class="pildoras">
+          <button
+            v-for="valor in opcionesTema"
+            :key="valor"
+            type="button"
+            class="btn pildora"
+            :class="{ activa: tema === valor }"
+            :aria-pressed="tema === valor"
+            @click="elegirTema(valor)"
+          >
+            <Sun
+              v-if="valor === 'claro'"
+            />
+
+            <Moon
+              v-else-if="valor === 'oscuro'"
+            />
+
+          </button>
+        </div>
+      </div>
 			<div class="perfil-borrar">
 				<button type="button" class="btn" @click="cerrarSesion">Cerrar sesión</button>
 				<template v-if="!confirmandoBorrado">
@@ -155,6 +185,24 @@ defineExpose({ abrir })
   border-top: 1px solid var(--border);
 }
 
+/* Selector de apariencia: fácil de cambiar, usa los mismos tokens que el resto. */
+.apariencia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.apariencia .pildoras {
+  flex-wrap: nowrap;
+}
+
+.apariencia .pildora {
+  padding: 0.35rem 0.6rem;
+}
+
+
 .perfil-borrar {
   display: flex;
   flex-direction: column;
@@ -183,4 +231,6 @@ defineExpose({ abrir })
   justify-content: center;
   gap: 0.5rem;
 }
+
+
 </style>

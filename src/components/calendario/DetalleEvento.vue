@@ -135,8 +135,8 @@ h4 {
   margin: 0;
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
-  background: #fdecec;
-  color: #5c1a1c;
+  background: var(--aviso-fondo);
+  color: var(--aviso-texto);
 }
 
 .datos {

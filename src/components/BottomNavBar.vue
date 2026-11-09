@@ -97,7 +97,7 @@ import {
   padding-bottom: env(safe-area-inset-bottom);
 
   background: var(--bg);
-  border-top: 2px solid var(--text-h);
+  border-top: 2px solid var(--border);
 }
 
 .nav-item {
@@ -161,8 +161,8 @@ import {
   color: var(--bg);
   padding: 10px;
   border-radius: 10%;
-  width: 44px;
-  height: 44px;
+  width: 35px;
+  height: 35px;
   box-sizing: content-box;
 }
 .nav-item-highlight.active span {
