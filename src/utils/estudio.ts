@@ -18,7 +18,10 @@ export const MATERIA_COMODIN: MateriaEstudio = {
 }
 
 export interface Sesion {
+  // Id para la interfaz. Se pierde al recargar la página: la identidad real es `uuid`.
   id: number
+  // Identidad estable para la sincronización. Se genera al crear la sesión.
+  uuid: string
   materiaId: number
   // YYYY-MM-DD en hora local
   fecha: string

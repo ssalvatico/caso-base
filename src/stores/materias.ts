@@ -53,6 +53,8 @@ export type TipoExamen = 'parcial' | 'final' | 'recuperatorio'
 
 export interface Examen {
   id: number
+  // Identidad estable para la sincronización.
+  uuid: string
   materiaId: number
   tipo: TipoExamen
   titulo: string
@@ -266,6 +268,8 @@ export const useMateriasStore = defineStore('materias', () => {
 
   // La API no publica fechas de parciales ni mesas: las carga el usuario.
   const examenes = refPersistido<Examen[]>('materias.examenes', () => [])
+  // Exámenes guardados antes de existir el uuid: se les asigna uno.
+  examenes.value = examenes.value.map(e => (e.uuid ? e : { ...e, uuid: crypto.randomUUID() }))
   let siguienteExamenId = siguienteId(examenes.value)
 
   function examenesDe(materiaId: number): Examen[] {
@@ -281,7 +285,7 @@ export const useMateriasStore = defineStore('materias', () => {
       e => e.materiaId === materiaId && e.tipo === datos.tipo && e.fecha === datos.fecha,
     )
     if (repetido) return false
-    examenes.value.push({ ...datos, id: siguienteExamenId++, materiaId })
+    examenes.value.push({ ...datos, id: siguienteExamenId++, uuid: crypto.randomUUID(), materiaId })
     return true
   }
 

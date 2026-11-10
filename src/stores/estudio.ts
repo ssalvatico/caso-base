@@ -4,7 +4,7 @@ import { MATERIAS_ESTUDIO } from '../data/materiasEstudio'
 import { agruparPorDia, MATERIA_COMODIN, type MateriaEstudio, type Sesion } from '../utils/estudio'
 import { refPersistido, siguienteId as calcularSiguienteId } from '../utils/persistencia'
 
-export type DatosSesion = Omit<Sesion, 'id'>
+export type DatosSesion = Omit<Sesion, 'id' | 'uuid'>
 
 // Materias que usaba el generador de datos demo de versiones anteriores.
 const MATERIAS_DEMO = new Set([312, 212, 311, 313, 223, 224, 221, 222])
@@ -31,6 +31,8 @@ export const useEstudioStore = defineStore('estudio', () => {
   const materias: MateriaEstudio[] = MATERIAS_ESTUDIO
   const sesiones = refPersistido<Sesion[]>('estudio.sesiones', () => [])
   sesiones.value = sinDatosDemo(sesiones.value)
+  // Sesiones guardadas antes de existir el uuid: se les asigna uno sin tocar el resto.
+  sesiones.value = sesiones.value.map(s => (s.uuid ? s : { ...s, uuid: crypto.randomUUID() }))
   const resaltada = ref<number | null>(null)
   const edicionPendiente = ref<number | null>(null)
   let siguienteId = calcularSiguienteId(sesiones.value)
@@ -47,7 +49,7 @@ export const useEstudioStore = defineStore('estudio', () => {
   }
 
   function agregar(datos: DatosSesion): Sesion {
-    const sesion = { ...datos, id: siguienteId++ }
+    const sesion = { ...datos, id: siguienteId++, uuid: crypto.randomUUID() }
     sesiones.value = [...sesiones.value, sesion]
     resaltada.value = sesion.id
     return sesion
