@@ -112,8 +112,6 @@ create table materias (
   codigo text,
   -- Código del plan precargado (por ejemplo, 322 para SO). Historial, no se edita.
   codigo_original text,
-  -- Seleccionada para el Pomodoro. Deseleccionar no borra la materia.
-  activa boolean not null default false,
   -- Estado de cursada del usuario.
   condicion text not null default 'no_cursable'
     check (condicion in ('no_cursable', 'regular', 'libre', 'aprobada')),
@@ -124,6 +122,60 @@ create table materias (
 );
 
 create index materias_carrera_idx on materias (carrera_id, anio, cuatrimestre);
+
+-- ---------------------------------------------------------------------------
+-- Materia seleccionada para el Pomodoro (una por usuario, o ninguna = Comodín)
+-- ---------------------------------------------------------------------------
+
+-- Se agrega acá porque materias recién existe en este punto.
+alter table perfiles_estudio
+  add column materia_activa_id uuid references materias (id) on delete set null;
+
+-- Una materia aprobada no se puede estudiar, y la materia elegida debe ser del mismo usuario.
+create or replace function validar_materia_activa()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.materia_activa_id is null then
+    return new;
+  end if;
+
+  if not exists (
+    select 1 from materias m
+    where m.id = new.materia_activa_id
+      and m.usuario_id = new.usuario_id
+      and m.condicion <> 'aprobada'
+  ) then
+    raise exception 'La materia no existe, no es tuya o ya está aprobada';
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger perfiles_estudio_materia_activa
+  before insert or update of materia_activa_id on perfiles_estudio
+  for each row execute function validar_materia_activa();
+
+-- Si una materia se aprueba, deja de ser la seleccionada.
+create or replace function liberar_materia_aprobada()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.condicion = 'aprobada' then
+    update perfiles_estudio
+       set materia_activa_id = null
+     where materia_activa_id = new.id;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger materias_liberar_aprobada
+  after update of condicion on materias
+  for each row execute function liberar_materia_aprobada();
 
 -- Asigna el código al crear, y lo recalcula solo para la materia que se mueve.
 create or replace function asignar_codigo_materia()
