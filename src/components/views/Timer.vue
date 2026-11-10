@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, reactive, ref } from 'vue'
+import { computed, inject, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { Check, ChevronDown, Pause, Pencil, Play, SkipForward, Square } from 'lucide-vue-next'
 import { useEstudioStore } from '../../stores/estudio'
+import { useMateriasStore } from '../../stores/materias'
+import { idEstudioDeCodigoPlan } from '../../data/planLCC2024'
+import { refPersistido } from '../../utils/persistencia'
 import { clave, hmm, hmmss, horasMinutos, MATERIA_COMODIN, pad, reloj, type ConfigPomodoro, type Sesion } from '../../utils/estudio'
 import RelojCircular from '../estudio/RelojCircular.vue'
 import SelectorMateria from '../estudio/SelectorMateria.vue'
@@ -14,11 +17,50 @@ type Estado = 'inicial' | 'corriendo' | 'pausado' | 'finalizado'
 type Fase = 'foco' | 'corto' | 'largo'
 
 const store = useEstudioStore()
+const materias = useMateriasStore()
 const navegar = inject<(tab: string) => void>('navegar', () => {})
 
 const modo = ref<Modo>('pomodoro')
 const config = reactive<ConfigPomodoro>({ foco: 25, corto: 5, largo: 15, ciclos: 4 })
-const materiaId = ref<number | null>(null)
+// Materia seleccionada para estudiar. Se guarda en el navegador para que no se pierda al recargar.
+// null = Comodín (sin materia asignada).
+const materiaId = refPersistido<number | null>('pomodoro.materia', () => null)
+
+// Ids del catálogo de estudio de las materias que el usuario eligió en su sección Materias.
+const elegidas = computed(
+  () =>
+    new Set(
+      materias.seleccionadas
+        .map(m => idEstudioDeCodigoPlan(m.code))
+        .filter((id): id is number => id !== null),
+    ),
+)
+
+// Ids del catálogo de estudio cuya materia ya está aprobada.
+const aprobadas = computed(
+  () =>
+    new Set(
+      materias.disponibles
+        .filter(m => materias.condicionDe(m.id) === 'aprobada')
+        .map(m => idEstudioDeCodigoPlan(m.code))
+        .filter((id): id is number => id !== null),
+    ),
+)
+
+// El selector solo ofrece las materias elegidas que no estén aprobadas (el Comodín se agrega aparte).
+const materiasElegibles = computed(() =>
+  store.materias.filter(m => elegidas.value.has(m.id) && !aprobadas.value.has(m.id)),
+)
+
+// Si la materia seleccionada deja de ser elegible (se aprobó o se quitó de la lista), se deselecciona.
+watch(
+  materiasElegibles,
+  lista => {
+    const id = materiaId.value
+    if (id !== null && id !== MATERIA_COMODIN.id && !lista.some(m => m.id === id)) materiaId.value = null
+  },
+  { immediate: true },
+)
 const estado = ref<Estado>('inicial')
 const fase = ref<Fase>('foco')
 const ciclo = ref(1)
@@ -350,7 +392,7 @@ const hoyPorMateria = computed(() => {
 
     <SelectorMateria
       v-model:abierto="selectorAbierto"
-      :materias="store.materias"
+      :materias="materiasElegibles"
       :destacada="MATERIA_COMODIN"
       :seleccion="materiaId"
       @elegir="elegirMateria"
