@@ -17,8 +17,8 @@
     <script>
       try {
         var t = localStorage.getItem('caso-base-tema');
-        if (t === 'claro') document.documentElement.dataset.theme = 'light';
-        else if (t === 'oscuro') document.documentElement.dataset.theme = 'dark';
+        // Por defecto es claro, aunque el sistema esté en oscuro.
+        document.documentElement.dataset.theme = t === 'oscuro' ? 'dark' : 'light';
       } catch (e) {}
     </script>
     <link rel="apple-touch-icon" href="/icons/logo_cb.png" />

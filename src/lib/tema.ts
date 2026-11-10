@@ -1,5 +1,5 @@
-// Preferencia de apariencia del dispositivo: 'sistema' sigue al celular o al navegador,
-// 'claro' y 'oscuro' la fijan. Se guarda solo en este navegador (es una comodidad local).
+// Preferencia de apariencia del dispositivo: 'claro' (por defecto) u 'oscuro'.
+// Se guarda solo en este navegador (es una comodidad local).
 
 export type Tema = 'claro' | 'oscuro'
 
