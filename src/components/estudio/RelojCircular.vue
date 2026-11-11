@@ -58,9 +58,12 @@ const marcas = Array.from({ length: 60 }, (_, i) => i)
 .reloj {
   display: grid;
   /* Además del ancho, se limita por el alto visible para que la pantalla entere sin scroll. */
-  width: min(78vw, 300px, 32dvh);
+  width: min(78vw, 300px, 28dvh);
   aspect-ratio: 1;
   margin: 0 auto;
+  /* El texto de adentro se mide en % de este ancho (abajo), para achicarse junto con el reloj
+     y no desbordar sobre lo que sigue cuando el reloj se achica (ver .timer.finalizado). */
+  container-type: inline-size;
 }
 
 .reloj > * {
@@ -116,6 +119,9 @@ svg {
   justify-content: center;
   gap: 0.25rem;
   text-align: center;
+  /* Red de seguridad: si algún texto no entrara igual, que se recorte en vez de tapar lo de afuera. */
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .etiqueta {
@@ -131,7 +137,8 @@ svg {
 }
 
 .tiempo {
-  font-size: clamp(2.5rem, 12vw, 3.6rem);
+  /* En cqw (ancho del propio reloj, no de la pantalla): se achica junto con el reloj. */
+  font-size: clamp(1.4rem, 19cqw, 3.6rem);
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.02em;

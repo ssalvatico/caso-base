@@ -17,6 +17,29 @@ export const MATERIA_COMODIN: MateriaEstudio = {
   color: '#8a93a6',
 }
 
+// Paleta Okabe-Ito, para materias elegidas que no están en el catálogo fijo (p. ej. inglés u optativas).
+const PALETA_MATERIAS_SIN_CATALOGO = [
+  '#0072B2',
+  '#E69F00',
+  '#009E73',
+  '#CC79A7',
+  '#4A4A4A',
+  '#56B4E9',
+  '#D55E00',
+  '#8C6D1F',
+]
+
+// Color estable (no cambia entre sesiones) para una materia sin color propio.
+export function colorDeterministico(id: number): string {
+  return PALETA_MATERIAS_SIN_CATALOGO[Math.abs(id) % PALETA_MATERIAS_SIN_CATALOGO.length]
+}
+
+// Id dentro del espacio de materias del Pomodoro para una materia que no está en el catálogo fijo.
+// Negativo: nunca choca con los ids del catálogo (positivos) ni con el Comodín (0).
+export function idDeMateriaSinCatalogo(id: number): number {
+  return -id
+}
+
 export interface Sesion {
   // Id para la interfaz. Se pierde al recargar la página: la identidad real es `uuid`.
   id: number

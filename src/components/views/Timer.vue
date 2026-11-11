@@ -3,7 +3,6 @@ import { computed, inject, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { Check, ChevronDown, Pause, Pencil, Play, SkipForward, Square } from 'lucide-vue-next'
 import { useEstudioStore } from '../../stores/estudio'
 import { useMateriasStore } from '../../stores/materias'
-import { idEstudioDeCodigoPlan } from '../../data/planLCC2024'
 import { refPersistido } from '../../utils/persistencia'
 import { clave, hmm, hmmss, horasMinutos, MATERIA_COMODIN, pad, reloj, type ConfigPomodoro, type Sesion } from '../../utils/estudio'
 import RelojCircular from '../estudio/RelojCircular.vue'
@@ -26,30 +25,13 @@ const config = reactive<ConfigPomodoro>({ foco: 25, corto: 5, largo: 15, ciclos:
 // null = Comodín (sin materia asignada).
 const materiaId = refPersistido<number | null>('pomodoro.materia', () => null)
 
-// Ids del catálogo de estudio de las materias que el usuario eligió en su sección Materias.
-const elegidas = computed(
-  () =>
-    new Set(
-      materias.seleccionadas
-        .map(m => idEstudioDeCodigoPlan(m.code))
-        .filter((id): id is number => id !== null),
-    ),
-)
-
-// Ids del catálogo de estudio cuya materia ya está aprobada.
-const aprobadas = computed(
-  () =>
-    new Set(
-      materias.disponibles
-        .filter(m => materias.condicionDe(m.id) === 'aprobada')
-        .map(m => idEstudioDeCodigoPlan(m.code))
-        .filter((id): id is number => id !== null),
-    ),
-)
-
-// El selector solo ofrece las materias elegidas que no estén aprobadas (el Comodín se agrega aparte).
+// El selector ofrece todo lo que el usuario eligió en su sección Materias (esté o no en el
+// catálogo fijo), menos lo que ya esté aprobado. El Comodín se agrega aparte.
 const materiasElegibles = computed(() =>
-  store.materias.filter(m => elegidas.value.has(m.id) && !aprobadas.value.has(m.id)),
+  materias.seleccionadas
+    .filter(m => materias.condicionDe(m.id) !== 'aprobada')
+    .map(m => store.materia(store.idEstudioDeMateria(m)))
+    .filter((m): m is NonNullable<typeof m> => !!m),
 )
 
 // Si la materia seleccionada deja de ser elegible (se aprobó o se quitó de la lista), se deselecciona.
@@ -379,7 +361,7 @@ const hoyPorMateria = computed(() => {
     </div>
 
     <div class="pie">
-      <span class="hoy num">Hoy: <strong>{{ hmm(hoyTotal) }}</strong> de foco</span>
+      <span class="hoy num">Hoy: <br><strong>{{ hmm(hoyTotal) }}</strong> de foco</span>
     </div>
 
     <ul v-if="hoyPorMateria.length" class="hoy-materias" aria-label="Foco de hoy por materia">
@@ -419,11 +401,6 @@ const hoyPorMateria = computed(() => {
     gap: 0.4rem;
     padding-top: 0;
   }
-}
-
-/* Con la sesión guardada, la tarjeta ya muestra el resumen: el reloj se achica. */
-.timer.finalizado :deep(.reloj) {
-  width: min(60vw, 220px, 21dvh);
 }
 
 /* Pantallas bajas: se compacta todo para que la pestaña no necesite scroll. */
