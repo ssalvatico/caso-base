@@ -3,6 +3,8 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { CODIGO_PLAN_POR_CODIGO_API, PLAN_LCC_2024, requisitosDelPlan } from '../data/planLCC2024'
 import { refPersistido, siguienteId } from '../utils/persistencia'
+import { cargarCarreraDb } from '../lib/materiasDb'
+import { useCarrerasStore } from './carreras'
 
 export interface Materia {
   id: number
@@ -101,13 +103,6 @@ export function etiquetaCondicion(condicion: Condicion) {
   return CONDICIONES.find(c => c.valor === condicion)?.etiqueta ?? condicion
 }
 
-interface Page<T> {
-  items: T[]
-  total: number
-  limit: number
-  offset: number
-}
-
 // "r123" -> año 1, cuatrimestre 2. Solo aplica a códigos con formato rXXX.
 function derivarAnioYCuatrimestre(code: string | null): { year: number; term: number } | null {
   const match = code?.trim().toLowerCase().match(/^r(\d)(\d)\d$/)
@@ -126,10 +121,6 @@ function adaptarAlPlan(materia: Materia): Materia {
   return derivado ? { ...materia, year: derivado.year, term: derivado.term } : materia
 }
 
-function apiUrl(): string | null {
-  return (import.meta.env.VITE_API_URL as string | undefined) ?? null
-}
-
 export const useMateriasStore = defineStore('materias', () => {
   const disponibles = ref<Materia[]>([])
   const seleccionadas = refPersistido<Materia[]>('materias.seleccionadas', () => [])
@@ -137,56 +128,33 @@ export const useMateriasStore = defineStore('materias', () => {
   const error = ref<string | null>(null)
 
   async function cargarDisponibles() {
-    const BASE_URL = import.meta.env.VITE_API_URL as string | undefined
-    if (!BASE_URL) {
-      error.value = 'Falta la variable VITE_API_URL en el archivo .env'
-      return
-    }
-
     cargando.value = true
     error.value = null
     try {
-      const url = `${BASE_URL}/subjects?career_id=1&kind=obligatoria`
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const data: Page<Materia> = await res.json()
-
-      disponibles.value = data.items.map(adaptarAlPlan)
+      const carrerasStore = useCarrerasStore()
+      const carrera = await cargarCarreraDb(carrerasStore.activa?.id)
+      disponibles.value = carrera.disponibles.map(adaptarAlPlan)
+      Object.assign(overviews.value, carrera.overviews)
+      // Las selecciones guardadas en el navegador se reconcilian por código, porque el id puede haber cambiado.
+      seleccionadas.value = seleccionadas.value.flatMap(s => {
+        const actual = disponibles.value.find(d => d.code === s.code)
+        return actual ? [actual] : []
+      })
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error al cargar materias'
       disponibles.value = []
     } finally {
       cargando.value = false
     }
-
-    // Las correlativas determinan qué materias están habilitadas, así que se cargan sin importar la pestaña.
-    void cargarOverviews(disponibles.value.map(m => m.id))
   }
 
   const overviews = ref<Record<number, MateriaOverview>>({})
   const overviewsCargando = ref<Record<number, boolean>>({})
   const overviewsError = ref<Record<number, string | null>>({})
 
+  // El detalle de cada materia ya viene con la carrera (ver cargarDisponibles).
   async function cargarOverview(id: number) {
-    if (overviews.value[id] || overviewsCargando.value[id]) return
-
-    const BASE_URL = apiUrl()
-    if (!BASE_URL) {
-      overviewsError.value[id] = 'Falta la variable VITE_API_URL en el archivo .env'
-      return
-    }
-
-    overviewsCargando.value[id] = true
-    overviewsError.value[id] = null
-    try {
-      const res = await fetch(`${BASE_URL}/subjects/${id}/overview`)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      overviews.value[id] = (await res.json()) as MateriaOverview
-    } catch (e) {
-      overviewsError.value[id] = e instanceof Error ? e.message : 'Error al cargar la materia'
-    } finally {
-      overviewsCargando.value[id] = false
-    }
+    if (!overviews.value[id]) overviewsError.value[id] = 'La materia no está en tu carrera'
   }
 
   const condiciones = refPersistido<Record<number, CondicionElegible>>('materias.condiciones', () => ({}))

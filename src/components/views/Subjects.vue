@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { ChevronDown, Plus, Pencil } from 'lucide-vue-next'
 import {
   CONDICIONES_ELEGIBLES,
   useMateriasStore,
@@ -7,12 +8,101 @@ import {
   type Materia,
   type MotivoBloqueo,
 } from '../../stores/materias.ts'
+import { useCarrerasStore } from '../../stores/carreras.ts'
 import { agruparPorAnioYCuatrimestre, tituloAnio, tituloCuatrimestre } from '../../utils/agrupar'
 import Colapsable from '../Colapsable.vue'
+import ModalAgregarMateria from '../ModalAgregarMateria.vue'
+import ModalEditarMateria from '../ModalEditarMateria.vue'
 
 const store = useMateriasStore()
-onMounted(() => store.cargarDisponibles())
+const carrerasStore = useCarrerasStore()
+const modalAgregar = ref<InstanceType<typeof ModalAgregarMateria> | null>(null)
+const modalEditar = ref<InstanceType<typeof ModalEditarMateria> | null>(null)
 
+onMounted(async () => {
+  await carrerasStore.cargar()
+  await store.cargarDisponibles()
+})
+
+async function onMateriaCreada() {
+  await store.cargarDisponibles()
+}
+
+async function onMateriaActualizada() {
+  await store.cargarDisponibles()
+}
+
+async function onMateriaEliminada() {
+  await store.cargarDisponibles()
+}
+
+// ── Selector de carrera ────────────────────────────────────────────────────────
+const selectorAbierto = ref(false)
+
+async function seleccionarCarrera(id: string) {
+  selectorAbierto.value = false
+  if (id === carrerasStore.activaId) return
+  carrerasStore.activar(id)
+  await store.cargarDisponibles()
+}
+
+// ── Modal agregar carrera ──────────────────────────────────────────────────────
+const dialogAgregar = ref<HTMLDialogElement | null>(null)
+const nuevaNombre = ref('')
+const nuevaSigla = ref('')
+const guardandoCarrera = ref(false)
+const errorCarrera = ref<string | null>(null)
+
+function abrirAgregarCarrera() {
+  selectorAbierto.value = false
+  nuevaNombre.value = ''
+  nuevaSigla.value = ''
+  errorCarrera.value = null
+  dialogAgregar.value?.showModal()
+}
+
+async function confirmarAgregarCarrera() {
+  if (!nuevaNombre.value.trim()) { errorCarrera.value = 'El nombre es obligatorio.'; return }
+  if (!nuevaSigla.value.trim()) { errorCarrera.value = 'La sigla es obligatoria.'; return }
+  guardandoCarrera.value = true
+  errorCarrera.value = null
+  try {
+    await carrerasStore.crear(nuevaNombre.value, nuevaSigla.value)
+    await store.cargarDisponibles()
+    dialogAgregar.value?.close()
+  } catch (e) {
+    errorCarrera.value = e instanceof Error ? e.message : 'Error al crear la carrera'
+  } finally {
+    guardandoCarrera.value = false
+  }
+}
+
+// ── Modal eliminar carrera ─────────────────────────────────────────────────────
+const dialogEliminar = ref<HTMLDialogElement | null>(null)
+const eliminandoCarrera = ref(false)
+const errorEliminar = ref<string | null>(null)
+
+function abrirEliminarCarrera() {
+  errorEliminar.value = null
+  dialogEliminar.value?.showModal()
+}
+
+async function confirmarEliminarCarrera() {
+  if (!carrerasStore.activa) return
+  eliminandoCarrera.value = true
+  errorEliminar.value = null
+  try {
+    await carrerasStore.eliminar(carrerasStore.activa.id)
+    await store.cargarDisponibles()
+    dialogEliminar.value?.close()
+  } catch (e) {
+    errorEliminar.value = e instanceof Error ? e.message : 'Error al eliminar la carrera'
+  } finally {
+    eliminandoCarrera.value = false
+  }
+}
+
+// ── Lista de materias ──────────────────────────────────────────────────────────
 function estaSeleccionada(materia: Materia) {
   return store.seleccionadas.some(s => s.id === materia.id)
 }
@@ -56,14 +146,50 @@ function contadorTexto(cantidad: number) {
 
 <template>
   <section class="subjects">
-    <header class="subjects-header">
-      <h3>Mis materias</h3>
+
+    <!-- Selector de carrera -->
+    <div class="carrera-selector-wrap">
+      <button
+        type="button"
+        class="carrera-selector"
+        :aria-expanded="selectorAbierto"
+        @click="selectorAbierto = !selectorAbierto"
+      >
+        <span class="carrera-nombre">{{ carrerasStore.activa?.nombre ?? 'Sin carrera' }}</span>
+        <ChevronDown :size="18" :class="{ rotado: selectorAbierto }" aria-hidden="true" />
+      </button>
+
+      <div v-if="selectorAbierto" class="carrera-menu">
+        <button
+          v-for="c in carrerasStore.lista"
+          :key="c.id"
+          type="button"
+          class="carrera-opcion"
+          :class="{ activa: c.id === carrerasStore.activaId }"
+          @click="seleccionarCarrera(c.id)"
+        >
+          <span class="carrera-opcion-nombre">{{ c.nombre }}</span>
+          <span class="carrera-opcion-sigla">{{ c.sigla }}</span>
+        </button>
+        <button type="button" class="carrera-opcion nueva" @click="abrirAgregarCarrera">
+          <Plus :size="14" aria-hidden="true" />
+          Agregar carrera
+        </button>
+      </div>
+    </div>
+
+    <div class="materias-header">
       <span class="contador">{{ contadorTexto(store.seleccionadas.length) }}</span>
-    </header>
+    </div>
 
     <p v-if="store.cargando" class="estado">Cargando materias...</p>
     <p v-else-if="store.error" class="estado estado-error">{{ store.error }}</p>
-    <p v-else-if="!store.disponibles.length" class="estado">No hay materias disponibles.</p>
+    <p v-else-if="!store.disponibles.length && carrerasStore.activa" class="estado">
+      Esta carrera no tiene materias todavía.
+    </p>
+    <p v-else-if="!carrerasStore.activa" class="estado">
+      No tenés ninguna carrera. Creá una con "+ Agregar carrera".
+    </p>
 
     <div class="anios">
       <Colapsable
@@ -104,23 +230,33 @@ function contadorTexto(cantidad: number) {
                     <code v-if="m.code" class="materia-codigo">{{ m.code }}</code>
                   </span>
                 </label>
-                <div class="materia-condicion">
-                  <label :for="`condicion-${m.id}`" class="sr-only">Condición en {{ m.name }}</label>
-                  <select
-                    :id="`condicion-${m.id}`"
-                    class="selector"
-                    :data-condicion="store.condicionDe(m.id)"
-                    :value="store.condicionDe(m.id)"
-                    :disabled="!!store.motivoBloqueo(m.id)"
-                    :aria-describedby="store.motivoBloqueo(m.id) ? `bloqueo-${m.id}` : undefined"
-                    @change="cambiarCondicion(m, $event)"
+                <div class="materia-acciones">
+                  <div class="materia-condicion">
+                    <label :for="`condicion-${m.id}`" class="sr-only">Condición en {{ m.name }}</label>
+                    <select
+                      :id="`condicion-${m.id}`"
+                      class="selector"
+                      :data-condicion="store.condicionDe(m.id)"
+                      :value="store.condicionDe(m.id)"
+                      :disabled="!!store.motivoBloqueo(m.id)"
+                      :aria-describedby="store.motivoBloqueo(m.id) ? `bloqueo-${m.id}` : undefined"
+                      @change="cambiarCondicion(m, $event)"
+                    >
+                      <option v-if="store.motivoBloqueo(m.id)" value="no_cursable" disabled>No cursable</option>
+                      <option v-for="c in CONDICIONES_ELEGIBLES" :key="c.valor" :value="c.valor">{{ c.etiqueta }}</option>
+                    </select>
+                    <small v-if="store.motivoBloqueo(m.id)" :id="`bloqueo-${m.id}`" class="bloqueo">
+                      {{ textoBloqueo(store.motivoBloqueo(m.id)) }}
+                    </small>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn-editar"
+                    :aria-label="`Editar ${m.name}`"
+                    @click.stop="modalEditar?.abrir(m)"
                   >
-                    <option v-if="store.motivoBloqueo(m.id)" value="no_cursable" disabled>No cursable</option>
-                    <option v-for="c in CONDICIONES_ELEGIBLES" :key="c.valor" :value="c.valor">{{ c.etiqueta }}</option>
-                  </select>
-                  <small v-if="store.motivoBloqueo(m.id)" :id="`bloqueo-${m.id}`" class="bloqueo">
-                    {{ textoBloqueo(store.motivoBloqueo(m.id)) }}
-                  </small>
+                    <Pencil :size="14" />
+                  </button>
                 </div>
               </div>
             </li>
@@ -128,7 +264,96 @@ function contadorTexto(cantidad: number) {
         </Colapsable>
       </Colapsable>
     </div>
+
+    <!-- Acciones del pie -->
+    <div class="acciones-pie">
+      <button
+        type="button"
+        class="accion-pie"
+        :disabled="!carrerasStore.activa"
+        :class="{ deshabilitada: !carrerasStore.activa }"
+        @click="modalAgregar?.abrir()"
+      >
+        Agregar materia
+      </button>
+      <button
+        v-if="carrerasStore.activa"
+        type="button"
+        class="accion-pie accion-peligro"
+        @click="abrirEliminarCarrera"
+      >
+        Eliminar carrera
+      </button>
+    </div>
   </section>
+
+  <!-- Modal: agregar carrera -->
+  <dialog ref="dialogAgregar" class="modal" @click.self="dialogAgregar?.close()">
+    <div class="modal-contenido">
+      <h3 class="modal-titulo">Nueva carrera</h3>
+
+      <div class="campo">
+        <label for="nueva-nombre">Nombre</label>
+        <input
+          id="nueva-nombre"
+          v-model="nuevaNombre"
+          type="text"
+          placeholder="Ej: Licenciatura en Ciencias de la Computación"
+          class="input"
+          autocomplete="off"
+          @keydown.enter="confirmarAgregarCarrera"
+        />
+      </div>
+      <div class="campo">
+        <label for="nueva-sigla">Sigla</label>
+        <input
+          id="nueva-sigla"
+          v-model="nuevaSigla"
+          type="text"
+          placeholder="Ej: LCC"
+          class="input input-chico"
+          autocomplete="off"
+          maxlength="10"
+          @keydown.enter="confirmarAgregarCarrera"
+        />
+      </div>
+
+      <p v-if="errorCarrera" class="modal-error">{{ errorCarrera }}</p>
+
+      <div class="modal-acciones">
+        <button type="button" class="btn-secundario" @click="dialogAgregar?.close()">Cancelar</button>
+        <button type="button" class="btn-primario" :disabled="guardandoCarrera" @click="confirmarAgregarCarrera">
+          {{ guardandoCarrera ? 'Creando…' : 'Crear' }}
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal: agregar materia -->
+  <ModalAgregarMateria ref="modalAgregar" @creada="onMateriaCreada" />
+
+  <!-- Modal: editar materia -->
+  <ModalEditarMateria ref="modalEditar" @actualizada="onMateriaActualizada" @eliminada="onMateriaEliminada" />
+
+  <!-- Modal: eliminar carrera -->
+  <dialog ref="dialogEliminar" class="modal" @click.self="dialogEliminar?.close()">
+    <div class="modal-contenido">
+      <h3 class="modal-titulo">Eliminar carrera</h3>
+      <p class="modal-texto">
+        ¿Eliminar <strong>{{ carrerasStore.activa?.nombre }}</strong>? Se borrarán todas sus materias, horarios y correlativas.
+        Esta acción no se puede deshacer.
+      </p>
+
+      <p v-if="errorEliminar" class="modal-error">{{ errorEliminar }}</p>
+
+      <div class="modal-acciones">
+        <button type="button" class="btn-secundario" @click="dialogEliminar?.close()">Cancelar</button>
+        <button type="button" class="btn-peligro" :disabled="eliminandoCarrera" @click="confirmarEliminarCarrera">
+          {{ eliminandoCarrera ? 'Eliminando…' : 'Eliminar' }}
+        </button>
+      </div>
+    </div>
+  </dialog>
 </template>
 
 <style scoped>
@@ -138,16 +363,105 @@ function contadorTexto(cantidad: number) {
   gap: 1rem;
 }
 
-.subjects-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
+/* ── Selector de carrera ── */
+.carrera-selector-wrap {
+  position: relative;
 }
 
-.subjects-header h3 {
-  margin: 0;
+.carrera-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
   color: var(--text-h);
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.carrera-selector svg {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.carrera-selector svg.rotado {
+  transform: rotate(180deg);
+}
+
+.carrera-nombre {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.carrera-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.carrera-opcion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.carrera-opcion:hover {
+  background: var(--accent-bg);
+}
+
+.carrera-opcion.activa {
+  background: var(--accent-bg);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.carrera-opcion.nueva {
+  display: flex;
+  gap: 0.4rem;
+  color: var(--accent-text);
+  border-top: 1px solid var(--border);
+  margin-top: 0.125rem;
+  padding-top: 0.625rem;
+}
+
+.carrera-opcion-sigla {
+  font-size: 0.8rem;
+  color: var(--text);
+  opacity: 0.6;
+}
+
+/* ── Header materias ── */
+.materias-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .contador {
@@ -155,6 +469,7 @@ function contadorTexto(cantidad: number) {
   color: var(--accent-text);
 }
 
+/* ── Estado ── */
 .estado {
   margin: 0;
   font-size: 14px;
@@ -164,6 +479,7 @@ function contadorTexto(cantidad: number) {
   color: #e5484d;
 }
 
+/* ── Lista de años ── */
 .anios {
   display: flex;
   flex-direction: column;
@@ -179,6 +495,7 @@ function contadorTexto(cantidad: number) {
   list-style: none;
 }
 
+/* ── Materia ── */
 .materia {
   display: flex;
   flex-wrap: wrap;
@@ -206,11 +523,40 @@ function contadorTexto(cantidad: number) {
   padding: 2px 6px;
 }
 
+.materia-acciones {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
 .materia-condicion {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 0.25rem;
+}
+
+.btn-editar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+
+.btn-editar:hover {
+  opacity: 1;
+  border-color: var(--accent-border);
+  color: var(--accent-text);
 }
 
 .selector {
@@ -301,4 +647,161 @@ function contadorTexto(cantidad: number) {
   text-decoration-thickness: 2px;
 }
 
+/* ── Acciones del pie ── */
+.acciones-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.accion-pie {
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  color: var(--accent-text);
+}
+
+.accion-pie.deshabilitada {
+  color: var(--text);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.accion-pie.accion-peligro {
+  color: #e5484d;
+}
+
+.accion-pie.accion-peligro:hover {
+  text-decoration: underline;
+}
+
+/* ── Modal ── */
+.modal {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--text);
+  padding: 0;
+  max-width: min(90vw, 420px);
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.modal::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.modal-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.modal-titulo {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-h);
+}
+
+.modal-texto {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.modal-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #e5484d;
+}
+
+.modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.campo label {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.input-chico {
+  max-width: 120px;
+}
+
+.btn-primario {
+  padding: 0.4rem 1.1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--text-h);
+  color: var(--bg);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-primario:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secundario {
+  padding: 0.4rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-secundario:hover {
+  border-color: var(--text);
+}
+
+.btn-peligro {
+  padding: 0.4rem 1.1rem;
+  border: none;
+  border-radius: 8px;
+  background: #e5484d;
+  color: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-peligro:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 </style>
