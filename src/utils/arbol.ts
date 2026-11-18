@@ -1,5 +1,5 @@
 import type { Materia } from '../stores/materias'
-import type { GrupoAnio } from './agrupar'
+import type { GrupoAnioConCuatrimestres } from './agrupar'
 
 export const NODO_ANCHO = 188
 export const NODO_ALTO = 104
@@ -41,7 +41,7 @@ export interface LayoutArbol {
 }
 
 // Cada cuatrimestre es una columna; los años agrupan sus columnas.
-export function calcularLayout(grupos: GrupoAnio[]): LayoutArbol {
+export function calcularLayout(grupos: GrupoAnioConCuatrimestres[]): LayoutArbol {
   const nodos: NodoPos[] = []
   const anios: EncabezadoAnio[] = []
   const terminos: EncabezadoTerm[] = []

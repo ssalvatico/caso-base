@@ -9,7 +9,7 @@ import {
   type MotivoBloqueo,
 } from '../../stores/materias.ts'
 import { useCarrerasStore } from '../../stores/carreras.ts'
-import { agruparPorAnioYCuatrimestre, tituloAnio, tituloCuatrimestre } from '../../utils/agrupar'
+import { agruparPorAnio, tituloAnio, etiquetaTerm } from '../../utils/agrupar'
 import Colapsable from '../Colapsable.vue'
 import ModalAgregarMateria from '../ModalAgregarMateria.vue'
 import ModalEditarMateria from '../ModalEditarMateria.vue'
@@ -123,20 +123,13 @@ function todasAprobadas(materias: Materia[]) {
   return materias.length > 0 && materias.every(estaAprobada)
 }
 
-const materiasPorAnioYCuatrimestre = computed(() =>
-  agruparPorAnioYCuatrimestre(store.disponibles).map(grupo => {
-    const cuatrimestres = grupo.cuatrimestres.map(c => ({
-      ...c,
-      seleccionadas: c.materias.filter(estaSeleccionada).length,
-      superado: todasAprobadas(c.materias),
-    }))
-    return {
-      anio: grupo.anio,
-      cuatrimestres,
-      seleccionadas: cuatrimestres.reduce((total, c) => total + c.seleccionadas, 0),
-      superado: cuatrimestres.every(c => c.superado),
-    }
-  }),
+const materiasPorAnio = computed(() =>
+  agruparPorAnio(store.disponibles).map(grupo => ({
+    anio: grupo.anio,
+    materias: grupo.materias,
+    seleccionadas: grupo.materias.filter(estaSeleccionada).length,
+    superado: todasAprobadas(grupo.materias),
+  })),
 )
 
 function contadorTexto(cantidad: number) {
@@ -193,75 +186,69 @@ function contadorTexto(cantidad: number) {
 
     <div class="anios">
       <Colapsable
-        v-for="grupo in materiasPorAnioYCuatrimestre"
+        v-for="grupo in materiasPorAnio"
         :key="String(grupo.anio)"
         :titulo="tituloAnio(grupo.anio)"
-        :badge="contadorTexto(grupo.seleccionadas)"
-        :superado="grupo.superado"
+        :badge="contadorTexto(grupo.materias.filter(m => estaSeleccionada(m)).length)"
+        :superado="grupo.materias.every(m => estaAprobada(m))"
         variante="anio"
       >
-        <Colapsable
-          v-for="cuatri in grupo.cuatrimestres"
-          :key="String(cuatri.term)"
-          :titulo="tituloCuatrimestre(cuatri.term)"
-          :badge="contadorTexto(cuatri.seleccionadas)"
-          :superado="cuatri.superado"
-          variante="cuatrimestre"
-        >
-          <ul class="lista">
-            <li v-for="m in cuatri.materias" :key="m.id">
-              <div
-                class="materia"
-                :class="{
-                  activa: estaSeleccionada(m),
-                  bloqueada: !store.esSeleccionable(m.id),
-                  aprobada: estaAprobada(m),
-                }"
-              >
-                <label class="materia-seleccion">
-                  <input
-                    type="checkbox"
-                    :checked="estaSeleccionada(m)"
-                    :disabled="!store.esSeleccionable(m.id)"
-                    @change="store.toggleMateria(m)"
-                  />
-                  <span class="materia-info">
-                    <span class="materia-nombre">{{ m.name }}</span>
+        <ul class="lista">
+          <li v-for="m in grupo.materias" :key="m.id">
+            <div
+              class="materia"
+              :class="{
+                activa: estaSeleccionada(m),
+                bloqueada: !store.esSeleccionable(m.id),
+                aprobada: estaAprobada(m),
+              }"
+            >
+              <label class="materia-seleccion">
+                <input
+                  type="checkbox"
+                  :checked="estaSeleccionada(m)"
+                  :disabled="!store.esSeleccionable(m.id)"
+                  @change="store.toggleMateria(m)"
+                />
+                <span class="materia-info">
+                  <span class="materia-nombre">{{ m.name }}</span>
+                  <span class="materia-tags">
                     <code v-if="m.code" class="materia-codigo">{{ m.code }}</code>
+                    <span class="tag-term">{{ etiquetaTerm(m) }}</span>
                   </span>
-                </label>
-                <div class="materia-acciones">
-                  <div class="materia-condicion">
-                    <label :for="`condicion-${m.id}`" class="sr-only">Condición en {{ m.name }}</label>
-                    <select
-                      :id="`condicion-${m.id}`"
-                      class="selector"
-                      :data-condicion="store.condicionDe(m.id)"
-                      :value="store.condicionDe(m.id)"
-                      :disabled="!!store.motivoBloqueo(m.id)"
-                      :aria-describedby="store.motivoBloqueo(m.id) ? `bloqueo-${m.id}` : undefined"
-                      @change="cambiarCondicion(m, $event)"
-                    >
-                      <option v-if="store.motivoBloqueo(m.id)" value="no_cursable" disabled>No cursable</option>
-                      <option v-for="c in CONDICIONES_ELEGIBLES" :key="c.valor" :value="c.valor">{{ c.etiqueta }}</option>
-                    </select>
-                    <small v-if="store.motivoBloqueo(m.id)" :id="`bloqueo-${m.id}`" class="bloqueo">
-                      {{ textoBloqueo(store.motivoBloqueo(m.id)) }}
-                    </small>
-                  </div>
-                  <button
-                    type="button"
-                    class="btn-editar"
-                    :aria-label="`Editar ${m.name}`"
-                    @click.stop="modalEditar?.abrir(m)"
+                </span>
+              </label>
+              <div class="materia-acciones">
+                <div class="materia-condicion">
+                  <label :for="`condicion-${m.id}`" class="sr-only">Condición en {{ m.name }}</label>
+                  <select
+                    :id="`condicion-${m.id}`"
+                    class="selector"
+                    :data-condicion="store.condicionDe(m.id)"
+                    :value="store.condicionDe(m.id)"
+                    :disabled="!!store.motivoBloqueo(m.id)"
+                    :aria-describedby="store.motivoBloqueo(m.id) ? `bloqueo-${m.id}` : undefined"
+                    @change="cambiarCondicion(m, $event)"
                   >
-                    <Pencil :size="14" />
-                  </button>
+                    <option v-if="store.motivoBloqueo(m.id)" value="no_cursable" disabled>No cursable</option>
+                    <option v-for="c in CONDICIONES_ELEGIBLES" :key="c.valor" :value="c.valor">{{ c.etiqueta }}</option>
+                  </select>
+                  <small v-if="store.motivoBloqueo(m.id)" :id="`bloqueo-${m.id}`" class="bloqueo">
+                    {{ textoBloqueo(store.motivoBloqueo(m.id)) }}
+                  </small>
                 </div>
+                <button
+                  type="button"
+                  class="btn-editar"
+                  :aria-label="`Editar ${m.name}`"
+                  @click.stop="modalEditar?.abrir(m)"
+                >
+                  <Pencil :size="14" />
+                </button>
               </div>
-            </li>
-          </ul>
-        </Colapsable>
+            </div>
+          </li>
+        </ul>
       </Colapsable>
     </div>
 
@@ -521,6 +508,24 @@ function contadorTexto(cantidad: number) {
   align-self: flex-start;
   font-size: 13px;
   padding: 2px 6px;
+}
+
+.materia-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.tag-term {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  line-height: 1.4;
 }
 
 .materia-acciones {

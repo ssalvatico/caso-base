@@ -8,6 +8,7 @@ interface FilaMateria {
   nombre: string
   anio: number
   cuatrimestre: number
+  anual: boolean
   codigo_original: string | null
   descripcion: string | null
   area: string | null
@@ -66,7 +67,7 @@ export async function cargarCarreraDb(carreraId?: string): Promise<{ disponibles
 
   const { data: filasMaterias, error: errorMaterias } = await supabase
     .from('materias')
-    .select('id, nombre, anio, cuatrimestre, codigo_original, descripcion, area, programa_url, sitio_url, campus_url')
+    .select('id, nombre, anio, cuatrimestre, anual, codigo_original, descripcion, area, programa_url, sitio_url, campus_url')
     .eq('carrera_id', idCarrera)
   if (errorMaterias) throw new Error(errorMaterias.message)
 
@@ -99,6 +100,7 @@ export async function cargarCarreraDb(carreraId?: string): Promise<{ disponibles
     year: m.anio,
     term: m.cuatrimestre,
     kind: 'obligatoria',
+    anual: m.anual,
   }))
 
   const overviews: Record<number, MateriaOverview> = {}
@@ -139,6 +141,7 @@ export async function cargarCarreraDb(carreraId?: string): Promise<{ disponibles
       year: m.anio,
       term: m.cuatrimestre,
       kind: 'obligatoria',
+      anual: m.anual,
       description: m.descripcion,
       syllabus_pdf_url: m.programa_url,
       campus_url: m.campus_url,

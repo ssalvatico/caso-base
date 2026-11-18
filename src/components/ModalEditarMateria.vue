@@ -20,6 +20,7 @@ const uuid = ref<string | null>(null)   // uuid de la materia en Supabase
 // Campos editables
 const nombre = ref('')
 const anio = ref<number>(1)
+const anual = ref(false)
 const cuatrimestre = ref<number>(1)
 const dependencias = ref<number[]>([])
 
@@ -55,6 +56,7 @@ function abrir(m: Materia) {
   uuid.value = uuidPorIdNumerico.get(m.id) ?? null
   nombre.value = m.name
   anio.value = m.year ?? 1
+  anual.value = m.anual
   cuatrimestre.value = m.term ?? 1
   // Dependencias actuales desde overview
   const ov = store.overviews[m.id]
@@ -75,6 +77,10 @@ function cerrar() {
 async function guardar() {
   if (!uuid.value) { error.value = 'No se encontró el uuid de la materia.'; return }
   if (!nombre.value.trim()) { error.value = 'El nombre es obligatorio.'; return }
+  if (!Number.isInteger(anio.value) || anio.value < 1) {
+    error.value = 'El año debe ser un número entero mayor a 0.'
+    return
+  }
   if (agregarComision.value && fin.value <= inicio.value) {
     error.value = 'El horario de fin debe ser posterior al de inicio.'
     return
@@ -93,7 +99,8 @@ async function guardar() {
     await editarMateria(uuid.value, {
       nombre: nombre.value,
       anio: anio.value,
-      cuatrimestre: cuatrimestre.value,
+      cuatrimestre: anual.value ? 1 : cuatrimestre.value,
+      anual: anual.value,
       dependeDeIds,
       comision: agregarComision.value ? { dia: dia.value, inicio: inicio.value, fin: fin.value } : undefined,
     })
@@ -167,15 +174,26 @@ defineExpose({ abrir })
           <input id="edit-nombre" v-model="nombre" type="text" class="input" autocomplete="off" />
         </div>
 
-        <!-- Año y cuatrimestre -->
+        <!-- Año, Anual y cuatrimestre -->
         <div class="fila-campos">
           <div class="campo">
             <label for="edit-anio">Año</label>
-            <select id="edit-anio" v-model.number="anio" class="input input-chico">
-              <option v-for="a in 5" :key="a" :value="a">{{ a }}°</option>
-            </select>
+            <input
+              id="edit-anio"
+              v-model.number="anio"
+              type="number"
+              min="1"
+              step="1"
+              class="input input-chico"
+            />
           </div>
-          <div class="campo">
+          <div class="campo campo-anual">
+            <label class="toggle-label">
+              <input v-model="anual" type="checkbox" />
+              Anual
+            </label>
+          </div>
+          <div v-if="!anual" class="campo">
             <label for="edit-cuatri">Cuatrimestre</label>
             <select id="edit-cuatri" v-model.number="cuatrimestre" class="input input-chico">
               <option :value="1">1°</option>
@@ -452,6 +470,10 @@ defineExpose({ abrir })
 .btn-quitar:hover {
   opacity: 1;
   color: #e5484d;
+}
+
+.campo-anual {
+  justify-content: center;
 }
 
 .toggle-label {

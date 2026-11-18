@@ -16,6 +16,7 @@ const dialog = ref<HTMLDialogElement | null>(null)
 // Campos del formulario
 const nombre = ref('')
 const anio = ref<number>(1)
+const anual = ref(false)
 const cuatrimestre = ref<number>(1)
 const dependencias = ref<number[]>([])  // ids numéricos
 
@@ -45,6 +46,7 @@ function toggleDependencia(id: number) {
 function abrir() {
   nombre.value = ''
   anio.value = 1
+  anual.value = false
   cuatrimestre.value = 1
   dependencias.value = []
   conComision.value = false
@@ -62,6 +64,10 @@ function cerrar() {
 async function confirmar() {
   if (!nombre.value.trim()) { error.value = 'El nombre es obligatorio.'; return }
   if (!carrerasStore.activa) { error.value = 'No hay carrera activa.'; return }
+  if (!Number.isInteger(anio.value) || anio.value < 1) {
+    error.value = 'El año debe ser un número entero mayor a 0.'
+    return
+  }
 
   if (conComision.value && fin.value <= inicio.value) {
     error.value = 'El horario de fin debe ser posterior al de inicio.'
@@ -83,7 +89,8 @@ async function confirmar() {
       carreraId: carrerasStore.activa.id,
       nombre: nombre.value,
       anio: anio.value,
-      cuatrimestre: cuatrimestre.value,
+      cuatrimestre: anual.value ? 1 : cuatrimestre.value,
+      anual: anual.value,
       dependeDeIds,
       comision: conComision.value ? { dia: dia.value, inicio: inicio.value, fin: fin.value } : undefined,
     })
@@ -122,15 +129,26 @@ defineExpose({ abrir })
         />
       </div>
 
-      <!-- Año y cuatrimestre en fila -->
+      <!-- Año, Anual y cuatrimestre -->
       <div class="fila-campos">
         <div class="campo">
           <label for="mat-anio">Año</label>
-          <select id="mat-anio" v-model.number="anio" class="input input-chico">
-            <option v-for="a in 5" :key="a" :value="a">{{ a }}°</option>
-          </select>
+          <input
+            id="mat-anio"
+            v-model.number="anio"
+            type="number"
+            min="1"
+            step="1"
+            class="input input-chico"
+          />
         </div>
-        <div class="campo">
+        <div class="campo campo-anual">
+          <label class="toggle-label">
+            <input v-model="anual" type="checkbox" />
+            Anual
+          </label>
+        </div>
+        <div v-if="!anual" class="campo">
           <label for="mat-cuatri">Cuatrimestre</label>
           <select id="mat-cuatri" v-model.number="cuatrimestre" class="input input-chico">
             <option :value="1">1°</option>
@@ -330,6 +348,10 @@ defineExpose({ abrir })
 .dep-codigo {
   font-size: 0.75rem;
   opacity: 0.6;
+}
+
+.campo-anual {
+  justify-content: center;
 }
 
 .toggle-label {

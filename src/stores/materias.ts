@@ -14,6 +14,7 @@ export interface Materia {
   year: number | null
   term: number | null
   kind: string | null
+  anual: boolean
 }
 
 export interface Comision {

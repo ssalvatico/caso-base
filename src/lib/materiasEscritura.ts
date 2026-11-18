@@ -7,6 +7,7 @@ export interface DatosMateria {
   nombre: string
   anio: number
   cuatrimestre: number
+  anual: boolean
   dependeDeIds: string[]       // UUIDs de las materias de las que depende
   comision?: DatosComision
 }
@@ -41,6 +42,7 @@ export async function crearMateria(datos: DatosMateria): Promise<MateriaCreada> 
       nombre: datos.nombre.trim(),
       anio: datos.anio,
       cuatrimestre: datos.cuatrimestre,
+      anual: datos.anual,
     })
     .select('id, nombre, anio, cuatrimestre, codigo_original')
     .single()
@@ -90,6 +92,7 @@ export interface DatosEditarMateria {
   nombre?: string
   anio?: number
   cuatrimestre?: number
+  anual?: boolean
   dependeDeIds?: string[]       // Reemplaza todas las dependencias
   comision?: DatosComision      // Agrega una comisión adicional
 }
@@ -100,6 +103,7 @@ export async function editarMateria(id: string, datos: DatosEditarMateria): Prom
   if (datos.nombre !== undefined) campos.nombre = datos.nombre.trim()
   if (datos.anio !== undefined) campos.anio = datos.anio
   if (datos.cuatrimestre !== undefined) campos.cuatrimestre = datos.cuatrimestre
+  if (datos.anual !== undefined) campos.anual = datos.anual
 
   if (Object.keys(campos).length) {
     const { error } = await supabase.from('materias').update(campos).eq('id', id)
