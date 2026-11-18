@@ -141,12 +141,12 @@ defineExpose({ abrir })
             step="1"
             class="input input-chico"
           />
-        </div>
-        <div class="campo campo-anual">
-          <label class="toggle-label">
-            <input v-model="anual" type="checkbox" />
-            Anual
-          </label>
+          <div class="campo campo-anual">
+            <label class="toggle-label">
+              <input v-model="anual" type="checkbox" />
+              Anual
+            </label>
+          </div>
         </div>
         <div v-if="!anual" class="campo">
           <label for="mat-cuatri">Cuatrimestre</label>
@@ -351,7 +351,7 @@ defineExpose({ abrir })
 }
 
 .campo-anual {
-  justify-content: center;
+  flex: 0 0 auto;
 }
 
 .toggle-label {
