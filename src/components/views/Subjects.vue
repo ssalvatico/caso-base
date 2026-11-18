@@ -657,33 +657,47 @@ function contadorTexto(cantidad: number) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
+  padding: 0.75rem 0 0.25rem;
   border-top: 1px solid var(--border);
-  font-size: 14px;
+  gap: 0.5rem;
 }
 
 .accion-pie {
-  background: none;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
   font: inherit;
-  font-size: 14px;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  padding: 0.25rem 0;
-  color: var(--accent-text);
+  transition: background 0.15s, opacity 0.15s;
+  border: 1px solid var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent-text, var(--accent));
+}
+
+.accion-pie:hover {
+  background: var(--accent);
+  color: var(--bg);
 }
 
 .accion-pie.deshabilitada {
-  color: var(--text);
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .accion-pie.accion-peligro {
+  border-color: #e5484d;
+  background: transparent;
   color: #e5484d;
 }
 
 .accion-pie.accion-peligro:hover {
-  text-decoration: underline;
+  background: #e5484d;
+  color: #fff;
 }
 
 /* ── Modal ── */

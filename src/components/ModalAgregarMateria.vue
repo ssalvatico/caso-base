@@ -131,7 +131,7 @@ defineExpose({ abrir })
 
       <!-- Año, Anual y cuatrimestre -->
       <div class="fila-campos">
-        <div class="campo">
+        <div class="campo campo-anio">
           <label for="mat-anio">Año</label>
           <input
             id="mat-anio"
@@ -139,27 +139,26 @@ defineExpose({ abrir })
             type="number"
             min="1"
             step="1"
-            class="input input-chico"
+            class="input"
           />
-          <div class="campo campo-anual">
-            <label class="toggle-label">
-              <input v-model="anual" type="checkbox" />
-              Anual
-            </label>
-          </div>
         </div>
-        <div v-if="!anual" class="campo">
+        
+        <div v-if="!anual" class="campo campo-cuatri">
           <label for="mat-cuatri">Cuatrimestre</label>
-          <select id="mat-cuatri" v-model.number="cuatrimestre" class="input input-chico">
+          <select id="mat-cuatri" v-model.number="cuatrimestre" class="input">
             <option :value="1">1°</option>
             <option :value="2">2°</option>
           </select>
         </div>
       </div>
-
+      <div class="campo campo-anual">
+          <label class="toggle-label">
+            <input v-model="anual" type="checkbox" />
+            <span>Anual?</span>
+          </label>
+      </div>
       <!-- Dependencias -->
       <div class="campo">
-        <span class="campo-label">Depende de</span>
         <p class="campo-ayuda">Dejá vacío si no tiene correlativas.</p>
         <div v-if="materiasElegibles.length" class="lista-deps">
           <label
@@ -293,13 +292,14 @@ defineExpose({ abrir })
 
 .fila-campos {
   display: flex;
-  gap: 0.75rem;
+  gap: 1.75rem;
   flex-wrap: wrap;
 }
 
 .fila-campos .campo {
-  flex: 1 1 80px;
+  flex: 0 0 40%;
 }
+
 
 .input {
   padding: 0.5rem 0.75rem;
@@ -309,15 +309,14 @@ defineExpose({ abrir })
   color: var(--text-h);
   font: inherit;
   font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
+  height: 2.25rem;
 }
 
 .input:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
-}
-
-.input-chico {
-  max-width: 120px;
 }
 
 .lista-deps {
@@ -348,10 +347,6 @@ defineExpose({ abrir })
 .dep-codigo {
   font-size: 0.75rem;
   opacity: 0.6;
-}
-
-.campo-anual {
-  flex: 0 0 auto;
 }
 
 .toggle-label {

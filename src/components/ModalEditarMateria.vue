@@ -176,7 +176,7 @@ defineExpose({ abrir })
 
         <!-- Año, Anual y cuatrimestre -->
         <div class="fila-campos">
-          <div class="campo">
+          <div class="campo campo-anio">
             <label for="edit-anio">Año</label>
             <input
               id="edit-anio"
@@ -184,22 +184,22 @@ defineExpose({ abrir })
               type="number"
               min="1"
               step="1"
-              class="input input-chico"
+              class="input"
             />
-            <div class="campo campo-anual">
-              <label class="toggle-label">
-                <input v-model="anual" type="checkbox" />
-                Anual
-              </label>
-            </div>
           </div>
-          <div v-if="!anual" class="campo">
+          <div v-if="!anual" class="campo campo-cuatri">
             <label for="edit-cuatri">Cuatrimestre</label>
-            <select id="edit-cuatri" v-model.number="cuatrimestre" class="input input-chico">
+            <select id="edit-cuatri" v-model.number="cuatrimestre" class="input">
               <option :value="1">1°</option>
               <option :value="2">2°</option>
             </select>
           </div>
+        </div>
+        <div class="campo campo-anual">
+          <label class="toggle-label">
+            <input v-model="anual" type="checkbox" />
+            <span>Anual?</span>
+          </label>
         </div>
 
         <!-- Dependencias -->
@@ -378,6 +378,10 @@ defineExpose({ abrir })
   flex: 1 1 80px;
 }
 
+.campo-anio  { flex: 0 0 72px; }
+.campo-anual { flex: 0 0 80px; }
+.campo-cuatri { flex: 1 1 100px; }
+
 .input {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
@@ -386,6 +390,8 @@ defineExpose({ abrir })
   color: var(--text-h);
   font: inherit;
   font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .input:focus {
@@ -472,9 +478,6 @@ defineExpose({ abrir })
   color: #e5484d;
 }
 
-.campo-anual {
-  flex: 1 1 auto;
-}
 
 .toggle-label {
   display: flex;
