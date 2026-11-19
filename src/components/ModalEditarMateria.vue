@@ -4,6 +4,7 @@ import { X, Trash2 } from 'lucide-vue-next'
 import { useMateriasStore, type Materia, type MateriaOverview } from '../stores/materias'
 import { editarMateria, eliminarMateria } from '../lib/materiasEscritura'
 import { uuidPorIdNumerico } from '../lib/materiasDb'
+import FormMateria from './FormMateria.vue'
 
 const emit = defineEmits<{
   (e: 'actualizada'): void
@@ -13,22 +14,18 @@ const emit = defineEmits<{
 const store = useMateriasStore()
 const dialog = ref<HTMLDialogElement | null>(null)
 
-// Materia que se está editando
 const materia = ref<Materia | null>(null)
-const uuid = ref<string | null>(null)   // uuid de la materia en Supabase
+const uuid = ref<string | null>(null)
 
-// Campos editables
-const nombre = ref('')
-const anio = ref<number>(1)
-const anual = ref(false)
+const nombre     = ref('')
+const anio       = ref<number>(1)
+const anual      = ref(false)
 const cuatrimestre = ref<number>(1)
 const dependencias = ref<number[]>([])
-
-// Nueva comisión
 const agregarComision = ref(false)
-const dia = ref<number>(1)
-const inicio = ref('08:00')
-const fin = ref('10:00')
+const dia          = ref<number>(1)
+const inicio       = ref('08:00')
+const fin          = ref('10:00')
 
 const guardando = ref(false)
 const eliminando = ref(false)
@@ -45,12 +42,6 @@ const materiasElegibles = computed<Materia[]>(() =>
   materia.value ? store.disponibles.filter(m => m.id !== materia.value!.id) : []
 )
 
-function toggleDependencia(id: number) {
-  const idx = dependencias.value.indexOf(id)
-  if (idx >= 0) dependencias.value.splice(idx, 1)
-  else dependencias.value.push(id)
-}
-
 function abrir(m: Materia) {
   materia.value = m
   uuid.value = uuidPorIdNumerico.get(m.id) ?? null
@@ -58,7 +49,6 @@ function abrir(m: Materia) {
   anio.value = m.year ?? 1
   anual.value = m.anual
   cuatrimestre.value = m.term ?? 1
-  // Dependencias actuales desde overview
   const ov = store.overviews[m.id]
   dependencias.value = ov?.prerequisites.map(p => p.id) ?? []
   agregarComision.value = false
@@ -114,14 +104,9 @@ async function guardar() {
 }
 
 async function quitarComision(comisionId: number) {
-  // comisionId es el id numérico derivado del uuid en la UI
-  // Necesitamos el uuid: lo buscamos en el overview
   const ov = materia.value ? store.overviews[materia.value.id] : null
   const sesion = ov?.sessions.find(s => s.id === comisionId)
   if (!sesion) return
-  // El id numérico en sesion.id fue derivado con idDeUuid(uuid), no podemos revertirlo.
-  // Para eliminarlo necesitamos buscar en Supabase por materia_id + dia + inicio.
-  // Alternativa: en materiasDb guardamos el mapa. Por ahora, eliminamos por materia+dia+inicio.
   error.value = null
   try {
     const { error: err } = await (await import('../lib/supabase')).supabase
@@ -132,7 +117,6 @@ async function quitarComision(comisionId: number) {
       .eq('inicio', sesion.start_time + ':00')
     if (err) throw new Error(err.message)
     emit('actualizada')
-    // Reabrir con la materia actualizada
     if (materia.value) abrir(materia.value)
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Error al quitar el horario'
@@ -168,110 +152,49 @@ defineExpose({ abrir })
       </div>
 
       <template v-if="!confirmandoEliminar">
-        <!-- Nombre -->
-        <div class="campo">
-          <label for="edit-nombre">Nombre</label>
-          <input id="edit-nombre" v-model="nombre" type="text" class="input" autocomplete="off" />
-        </div>
-
-        <!-- Año, Anual y cuatrimestre -->
-        <div class="fila-campos">
-          <div class="campo campo-anio">
-            <label for="edit-anio">Año</label>
-            <input
-              id="edit-anio"
-              v-model.number="anio"
-              type="number"
-              min="1"
-              step="1"
-              class="input"
-            />
+        <FormMateria
+          v-model:nombre="nombre"
+          v-model:anio="anio"
+          v-model:anual="anual"
+          v-model:cuatrimestre="cuatrimestre"
+          v-model:dependencias="dependencias"
+          v-model:conComision="agregarComision"
+          v-model:dia="dia"
+          v-model:inicio="inicio"
+          v-model:fin="fin"
+          :materias-elegibles="materiasElegibles"
+          id-prefix="edit"
+          :mostrar-comision="true"
+        >
+          <!-- Horarios existentes — slot entre dependencias y toggle de nuevo horario -->
+          <div v-if="overview?.sessions.length" class="campo">
+            <span class="campo-label">Horarios</span>
+            <ul class="lista-comisiones">
+              <li v-for="s in overview.sessions" :key="s.id" class="comision-item">
+                <span class="comision-texto">
+                  {{ DIAS[(s.weekday ?? 1) - 1] }} {{ s.start_time }}–{{ s.end_time }}
+                  <span v-if="s.campus" class="comision-extra"> · {{ s.campus }}</span>
+                </span>
+                <button type="button" class="btn-quitar" aria-label="Quitar horario" @click="quitarComision(s.id)">
+                  <Trash2 :size="14" />
+                </button>
+              </li>
+            </ul>
           </div>
-          <div v-if="!anual" class="campo campo-cuatri">
-            <label for="edit-cuatri">Cuatrimestre</label>
-            <select id="edit-cuatri" v-model.number="cuatrimestre" class="input">
-              <option :value="1">1°</option>
-              <option :value="2">2°</option>
-            </select>
-          </div>
-        </div>
-        <div class="campo campo-anual">
-          <label class="toggle-label">
-            <input v-model="anual" type="checkbox" />
-            <span>Anual?</span>
-          </label>
-        </div>
-
-        <!-- Dependencias -->
-        <div class="campo">
-          <span class="campo-label">Depende de</span>
-          <div v-if="materiasElegibles.length" class="lista-deps">
-            <label v-for="m in materiasElegibles" :key="m.id" class="dep-item">
-              <input
-                type="checkbox"
-                :checked="dependencias.includes(m.id)"
-                @change="toggleDependencia(m.id)"
-              />
-              <span>{{ m.name }}</span>
-              <code v-if="m.code" class="dep-codigo">{{ m.code }}</code>
-            </label>
-          </div>
-          <p v-else class="campo-ayuda">No hay otras materias en la carrera.</p>
-        </div>
-
-        <!-- Horarios existentes -->
-        <div v-if="overview?.sessions.length" class="campo">
-          <span class="campo-label">Horarios</span>
-          <ul class="lista-comisiones">
-            <li v-for="s in overview.sessions" :key="s.id" class="comision-item">
-              <span class="comision-texto">
-                {{ DIAS[(s.weekday ?? 1) - 1] }} {{ s.start_time }}–{{ s.end_time }}
-                <span v-if="s.campus" class="comision-extra"> · {{ s.campus }}</span>
-              </span>
-              <button type="button" class="btn-quitar" aria-label="Quitar horario" @click="quitarComision(s.id)">
-                <Trash2 :size="14" />
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Agregar horario -->
-        <div class="campo">
-          <label class="toggle-label">
-            <input v-model="agregarComision" type="checkbox" />
-            Agregar otro horario
-          </label>
-        </div>
-
-        <div v-if="agregarComision" class="fila-campos">
-          <div class="campo">
-            <label for="edit-dia">Día</label>
-            <select id="edit-dia" v-model.number="dia" class="input">
-              <option v-for="(d, i) in DIAS" :key="i + 1" :value="i + 1">{{ d }}</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label for="edit-inicio">Desde</label>
-            <input id="edit-inicio" v-model="inicio" type="time" class="input input-chico" />
-          </div>
-          <div class="campo">
-            <label for="edit-fin">Hasta</label>
-            <input id="edit-fin" v-model="fin" type="time" class="input input-chico" />
-          </div>
-        </div>
+        </FormMateria>
 
         <p v-if="error" class="modal-error">{{ error }}</p>
 
-        <div class="modal-acciones">
-          <button type="button" class="btn-peligro-texto" @click="confirmandoEliminar = true">
-            Eliminar materia
-          </button>
+        <div class="modal-acciones modal-acciones-editar">
           <div class="acciones-derecha">
-            <button type="button" class="btn-secundario" @click="cerrar">Cancelar</button>
             <button type="button" class="btn-primario" :disabled="guardando" @click="guardar">
               {{ guardando ? 'Guardando…' : 'Guardar' }}
             </button>
+            <button type="button" class="btn-secundario" @click="cerrar">Cancelar</button>
           </div>
+          <button type="button" class="btn-peligro-texto" @click="confirmandoEliminar = true">
+            Eliminar materia
+          </button>
         </div>
       </template>
 
@@ -293,286 +216,11 @@ defineExpose({ abrir })
   </dialog>
 </template>
 
-<style scoped>
-.modal {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--bg);
-  color: var(--text);
-  padding: 0;
-  max-width: min(92vw, 460px);
-  width: 100%;
-  max-height: 90dvh;
-  overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-}
+<style>
+@import './form-modal.css';
 
-.modal::backdrop {
-  background: rgba(0, 0, 0, 0.4);
-}
-
-.modal-contenido {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-}
-
-.modal-cabecera {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.modal-titulo {
-  margin: 0;
-  font-size: 1.1rem;
-  color: var(--text-h);
-}
-
-.btn-cerrar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-}
-
-.btn-cerrar:hover {
-  background: var(--accent-bg);
-}
-
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.campo label,
-.campo-label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.campo-ayuda {
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--text);
-  opacity: 0.6;
-}
-
-.fila-campos {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.fila-campos .campo {
-  flex: 1 1 80px;
-}
-
-.campo-anio  { flex: 0 0 72px; }
-.campo-anual { flex: 0 0 80px; }
-.campo-cuatri { flex: 1 1 100px; }
-
-.input {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg);
-  color: var(--text-h);
-  font: inherit;
-  font-size: 0.95rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.input:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.input-chico {
-  max-width: 120px;
-}
-
-.lista-deps {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  max-height: 160px;
-  overflow-y: auto;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem;
-}
-
-.dep-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 0.2rem 0;
-}
-
-.dep-item input {
-  accent-color: var(--accent);
-  flex-shrink: 0;
-}
-
-.dep-codigo {
-  font-size: 0.75rem;
-  opacity: 0.6;
-}
-
-.lista-comisiones {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.comision-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.85rem;
-}
-
-.comision-texto {
-  color: var(--text-h);
-}
-
-.comision-extra {
-  color: var(--text);
-  opacity: 0.7;
-}
-
-.btn-quitar {
-  display: flex;
-  align-items: center;
-  padding: 4px;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-  opacity: 0.5;
-}
-
-.btn-quitar:hover {
-  opacity: 1;
-  color: #e5484d;
-}
-
-
-.toggle-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.toggle-label input {
-  accent-color: var(--accent);
-}
-
-.modal-texto {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.modal-error {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #e5484d;
-}
-
-.modal-acciones {
-  display: flex;
+.modal-acciones-editar {
   justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
-}
-
-.acciones-derecha {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.btn-primario {
-  padding: 0.4rem 1.1rem;
-  border: none;
-  border-radius: 8px;
-  background: var(--text-h);
-  color: var(--bg);
-  font: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.btn-primario:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-secundario {
-  padding: 0.4rem 1.1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text);
-  font: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.btn-secundario:hover {
-  border-color: var(--text);
-}
-
-.btn-peligro {
-  padding: 0.4rem 1.1rem;
-  border: none;
-  border-radius: 8px;
-  background: #e5484d;
-  color: #fff;
-  font: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.btn-peligro:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-peligro-texto {
-  background: none;
-  border: none;
-  font: inherit;
-  font-size: 0.85rem;
-  color: #e5484d;
-  cursor: pointer;
-  padding: 0.25rem 0;
-}
-
-.btn-peligro-texto:hover {
-  text-decoration: underline;
 }
 </style>
