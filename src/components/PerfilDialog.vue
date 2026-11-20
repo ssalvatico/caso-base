@@ -3,12 +3,19 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { X } from 'lucide-vue-next'
 import { supabase } from '../lib/supabase'
-import { guardarTema, leerTema, opcionesTema, type Tema } from '../lib/tema'
+import { acentos, aplicarTema, guardarAcento, guardarTema, leerAcento, leerTema, opcionesTema, type Acento, type Tema } from '../lib/tema'
 
 const tema = ref<Tema>(leerTema())
+const acento = ref<Acento>(leerAcento())
+const nombresAcento = Object.keys(acentos) as Acento[]
 function elegirTema(nuevo: Tema) {
   tema.value = nuevo
   guardarTema(nuevo)
+}
+function elegirAcento(nuevo: Acento) {
+  acento.value = nuevo
+  guardarAcento(nuevo)
+  aplicarTema(tema.value)
 }
 
 const router = useRouter()
@@ -98,6 +105,19 @@ import { Sun, Moon } from "lucide-vue-next";
             />
 
           </button>
+        </div>
+        <div class="pildoras acentos">
+          <button
+            v-for="nombre in nombresAcento"
+            :key="nombre"
+            type="button"
+            class="acento"
+            :class="{ activa: acento === nombre }"
+            :style="{ background: acentos[nombre][tema === 'claro' ? 0 : 1] }"
+            :aria-label="`Color ${nombre}`"
+            :aria-pressed="acento === nombre"
+            @click="elegirAcento(nombre)"
+          />
         </div>
       </div>
 			<div class="perfil-borrar">
@@ -200,6 +220,29 @@ import { Sun, Moon } from "lucide-vue-next";
 
 .apariencia .pildora {
   padding: 0.35rem 0.6rem;
+}
+
+.acentos {
+  justify-content: center;
+}
+
+.acento {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.acento.activa {
+  border-color: var(--text-h);
+  box-shadow: 0 0 0 2px var(--bg) inset;
+}
+
+.acento:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 
