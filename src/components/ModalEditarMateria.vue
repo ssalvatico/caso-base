@@ -2,13 +2,12 @@
 import { ref, computed } from 'vue'
 import { X, Trash2 } from 'lucide-vue-next'
 import { useMateriasStore, type Materia, type MateriaOverview } from '../stores/materias'
-import { editarMateria, eliminarMateria } from '../lib/materiasEscritura'
+import { editarMateria } from '../lib/materiasEscritura'
 import { uuidPorIdNumerico } from '../lib/materiasDb'
 import FormMateria from './FormMateria.vue'
 
 const emit = defineEmits<{
   (e: 'actualizada'): void
-  (e: 'eliminada'): void
 }>()
 
 const store = useMateriasStore()
@@ -28,8 +27,6 @@ const inicio       = ref('08:00')
 const fin          = ref('10:00')
 
 const guardando = ref(false)
-const eliminando = ref(false)
-const confirmandoEliminar = ref(false)
 const error = ref<string | null>(null)
 
 const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
@@ -55,7 +52,6 @@ function abrir(m: Materia) {
   dia.value = 1
   inicio.value = '08:00'
   fin.value = '10:00'
-  confirmandoEliminar.value = false
   error.value = null
   dialog.value?.showModal()
 }
@@ -123,21 +119,6 @@ async function quitarComision(comisionId: number) {
   }
 }
 
-async function confirmarEliminar() {
-  if (!uuid.value) return
-  eliminando.value = true
-  error.value = null
-  try {
-    await eliminarMateria(uuid.value)
-    cerrar()
-    emit('eliminada')
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Error al eliminar'
-  } finally {
-    eliminando.value = false
-  }
-}
-
 defineExpose({ abrir })
 </script>
 
@@ -150,68 +131,49 @@ defineExpose({ abrir })
           <X :size="18" />
         </button>
       </div>
-
-      <template v-if="!confirmandoEliminar">
-        <FormMateria
-          v-model:nombre="nombre"
-          v-model:anio="anio"
-          v-model:anual="anual"
-          v-model:cuatrimestre="cuatrimestre"
-          v-model:dependencias="dependencias"
-          v-model:conComision="agregarComision"
-          v-model:dia="dia"
-          v-model:inicio="inicio"
-          v-model:fin="fin"
-          :materias-elegibles="materiasElegibles"
-          id-prefix="edit"
-          :mostrar-comision="true"
-        >
-          <!-- Horarios existentes — slot entre dependencias y toggle de nuevo horario -->
-          <div v-if="overview?.sessions.length" class="campo">
-            <span class="campo-label">Horarios</span>
-            <ul class="lista-comisiones">
-              <li v-for="s in overview.sessions" :key="s.id" class="comision-item">
-                <span class="comision-texto">
-                  {{ DIAS[(s.weekday ?? 1) - 1] }} {{ s.start_time }}–{{ s.end_time }}
-                  <span v-if="s.campus" class="comision-extra"> · {{ s.campus }}</span>
-                </span>
-                <button type="button" class="btn-quitar" aria-label="Quitar horario" @click="quitarComision(s.id)">
-                  <Trash2 :size="14" />
-                </button>
-              </li>
-            </ul>
-          </div>
-        </FormMateria>
-
-        <p v-if="error" class="modal-error">{{ error }}</p>
-
-        <div class="modal-acciones modal-acciones-editar">
-          <div class="acciones-derecha">
-            <button type="button" class="btn-primario" :disabled="guardando" @click="guardar">
-              {{ guardando ? 'Guardando…' : 'Guardar' }}
-            </button>
-            <button type="button" class="btn-secundario" @click="cerrar">Cancelar</button>
-          </div>
-          <button type="button" class="btn-peligro-texto" @click="confirmandoEliminar = true">
-            Eliminar materia
-          </button>
+      
+      <FormMateria
+        v-model:nombre="nombre"
+        v-model:anio="anio"
+        v-model:anual="anual"
+        v-model:cuatrimestre="cuatrimestre"
+        v-model:dependencias="dependencias"
+        v-model:conComision="agregarComision"
+        v-model:dia="dia"
+        v-model:inicio="inicio"
+        v-model:fin="fin"
+        :materias-elegibles="materiasElegibles"
+        id-prefix="edit"
+        :mostrar-comision="true"
+      >
+        <!-- Horarios existentes — slot entre dependencias y toggle de nuevo horario -->
+        <div v-if="overview?.sessions.length" class="campo">
+          <span class="campo-label">Horarios</span>
+          <ul class="lista-comisiones">
+            <li v-for="s in overview.sessions" :key="s.id" class="comision-item">
+              <span class="comision-texto">
+                {{ DIAS[(s.weekday ?? 1) - 1] }} {{ s.start_time }}–{{ s.end_time }}
+                <span v-if="s.campus" class="comision-extra"> · {{ s.campus }}</span>
+              </span>
+              <button type="button" class="btn-quitar" aria-label="Quitar horario" @click="quitarComision(s.id)">
+                <Trash2 :size="14" />
+              </button>
+            </li>
+          </ul>
         </div>
-      </template>
+      </FormMateria>
 
-      <!-- Confirmación eliminar -->
-      <template v-else>
-        <p class="modal-texto">
-          ¿Eliminar <strong>{{ materia?.name }}</strong>? Se borrarán sus horarios y sesiones de estudio.
-          Esta acción no se puede deshacer.
-        </p>
-        <p v-if="error" class="modal-error">{{ error }}</p>
-        <div class="modal-acciones">
-          <button type="button" class="btn-secundario" @click="confirmandoEliminar = false">Volver</button>
-          <button type="button" class="btn-peligro" :disabled="eliminando" @click="confirmarEliminar">
-            {{ eliminando ? 'Eliminando…' : 'Eliminar' }}
+      <p v-if="error" class="modal-error">{{ error }}</p>
+
+      <div class="modal-acciones modal-acciones-editar">
+        <div class="acciones-derecha">
+          <button type="button" class="btn-primario" :disabled="guardando" @click="guardar">
+            {{ guardando ? 'Guardando…' : 'Guardar' }}
           </button>
+          <button type="button" class="btn-secundario" @click="cerrar">Cancelar</button>
         </div>
-      </template>
+      </div>
+
     </div>
   </dialog>
 </template>

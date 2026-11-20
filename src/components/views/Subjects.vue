@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ChevronDown, Plus, Pencil } from 'lucide-vue-next'
+import { ChevronDown, Plus, Pencil, Trash2 } from 'lucide-vue-next'
 import {
   CONDICIONES_ELEGIBLES,
   useMateriasStore,
@@ -13,6 +13,8 @@ import { agruparPorAnio, tituloAnio, etiquetaTerm } from '../../utils/agrupar'
 import Colapsable from '../Colapsable.vue'
 import ModalAgregarMateria from '../ModalAgregarMateria.vue'
 import ModalEditarMateria from '../ModalEditarMateria.vue'
+import { eliminarMateria } from '../../lib/materiasEscritura'
+import { uuidPorIdNumerico } from '../../lib/materiasDb'
 
 const store = useMateriasStore()
 const carrerasStore = useCarrerasStore()
@@ -29,10 +31,6 @@ async function onMateriaCreada() {
 }
 
 async function onMateriaActualizada() {
-  await store.cargarDisponibles()
-}
-
-async function onMateriaEliminada() {
   await store.cargarDisponibles()
 }
 
@@ -99,6 +97,40 @@ async function confirmarEliminarCarrera() {
     errorEliminar.value = e instanceof Error ? e.message : 'Error al eliminar la carrera'
   } finally {
     eliminandoCarrera.value = false
+  }
+}
+
+// ── Eliminar materia ───────────────────────────────────────────────────────────
+const dialogEliminarMateria = ref<HTMLDialogElement | null>(null)
+const materiaAEliminar = ref<Materia | null>(null)
+const eliminandoMateria = ref(false)
+const errorEliminarMateria = ref<string | null>(null)
+
+function pedirEliminarMateria(materia: Materia) {
+  materiaAEliminar.value = materia
+  errorEliminarMateria.value = null
+  dialogEliminarMateria.value?.showModal()
+}
+
+async function confirmarEliminarMateria() {
+  const materia = materiaAEliminar.value
+  if (!materia) return
+  const uuid = uuidPorIdNumerico.get(materia.id)
+  if (!uuid) {
+    errorEliminarMateria.value = 'No se encontró el uuid de la materia.'
+    return
+  }
+  eliminandoMateria.value = true
+  errorEliminarMateria.value = null
+  try {
+    await eliminarMateria(uuid)
+    store.seleccionadas = store.seleccionadas.filter(s => s.id !== materia.id)
+    await store.cargarDisponibles()
+    dialogEliminarMateria.value?.close()
+  } catch (e) {
+    errorEliminarMateria.value = e instanceof Error ? e.message : 'Error al eliminar la materia'
+  } finally {
+    eliminandoMateria.value = false
   }
 }
 
@@ -245,6 +277,14 @@ function contadorTexto(cantidad: number) {
                 >
                   <Pencil :size="14" />
                 </button>
+                <button
+                  type="button"
+                  class="btn-eliminar"
+                  :aria-label="`Eliminar ${m.name}`"
+                  @click.stop="pedirEliminarMateria(m)"
+                >
+                  <Trash2 :size="14" />
+                </button>
               </div>
             </div>
           </li>
@@ -320,7 +360,27 @@ function contadorTexto(cantidad: number) {
   <ModalAgregarMateria ref="modalAgregar" @creada="onMateriaCreada" />
 
   <!-- Modal: editar materia -->
-  <ModalEditarMateria ref="modalEditar" @actualizada="onMateriaActualizada" @eliminada="onMateriaEliminada" />
+  <ModalEditarMateria ref="modalEditar" @actualizada="onMateriaActualizada" />
+
+  <!-- Modal: eliminar materia -->
+  <dialog ref="dialogEliminarMateria" class="modal" @click.self="dialogEliminarMateria?.close()">
+    <div class="modal-contenido">
+      <h3 class="modal-titulo">Eliminar materia</h3>
+      <p class="modal-texto">
+        ¿Eliminar <strong>{{ materiaAEliminar?.name }}</strong>? Se borrarán sus horarios, exámenes y sesiones de estudio.
+        Esta acción no se puede deshacer.
+      </p>
+
+      <p v-if="errorEliminarMateria" class="modal-error">{{ errorEliminarMateria }}</p>
+
+      <div class="modal-acciones">
+        <button type="button" class="btn-secundario" @click="dialogEliminarMateria?.close()">Cancelar</button>
+        <button type="button" class="btn-peligro" :disabled="eliminandoMateria" @click="confirmarEliminarMateria">
+          {{ eliminandoMateria ? 'Eliminando…' : 'Eliminar' }}
+        </button>
+      </div>
+    </div>
+  </dialog>
 
   <!-- Modal: eliminar carrera -->
   <dialog ref="dialogEliminar" class="modal" @click.self="dialogEliminar?.close()">
@@ -562,6 +622,29 @@ function contadorTexto(cantidad: number) {
   opacity: 1;
   border-color: var(--accent-border);
   color: var(--accent-text);
+}
+
+.btn-eliminar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn-eliminar:hover {
+  opacity: 1;
+  border-color: var(--peligro);
+  color: var(--peligro);
 }
 
 .selector {

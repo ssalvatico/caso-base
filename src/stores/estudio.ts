@@ -71,9 +71,11 @@ export const useEstudioStore = defineStore('estudio', () => {
   // El comodín (id 0) y las materias elegidas por el usuario se resuelven igual que el catálogo,
   // estén o no en el catálogo fijo, así cualquier materia elegida se puede estudiar.
   const materiaPorId = computed(() => {
-    const elegidas = materiasStore.seleccionadas.map(materiaEstudioDeApi)
-    return new Map([MATERIA_COMODIN, ...materias, ...elegidas].map(m => [m.id, m] as const))
+    const delCarrera = materiasStore.disponibles.map(materiaEstudioDeApi)
+    return new Map([MATERIA_COMODIN, ...materias, ...delCarrera].map(m => [m.id, m] as const))
   })
+  // Materias de la carrera activa, para elegirlas al cargar un registro.
+  const materiasDeCarrera = computed(() => materiasStore.disponibles.map(materiaEstudioDeApi))
   const porDia = computed(() => agruparPorDia(sesiones.value))
   const ordenadas = computed(() =>
     [...sesiones.value].sort((a, b) => b.fecha.localeCompare(a.fecha) || b.inicio - a.inicio),
@@ -109,6 +111,7 @@ export const useEstudioStore = defineStore('estudio', () => {
 
   return {
     materias,
+    materiasDeCarrera,
     sesiones,
     resaltada,
     edicionPendiente,

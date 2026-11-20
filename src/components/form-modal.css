@@ -84,9 +84,8 @@
   flex: 0 0 40%;
 }
 
-.campo-anio  { flex: 0 0 72px !important; }
-.campo-anual { flex: 0 0 80px; }
-.campo-cuatri { flex: 1 1 100px !important; }
+.campo-anio,.campo-cuatri  { flex: 0 0 30% !important; }
+.campo-anual { flex: 0 0 auto; }
 
 .input {
   padding: 0.5rem 0.75rem;

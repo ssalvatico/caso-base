@@ -31,6 +31,7 @@ const anios = computed(() => [...new Set(props.materias.map(m => m.anio))].sort(
 const materia = computed(() => props.materias.find(m => m.id === form.materiaId))
 const minutos = computed(() => (form.inicio && form.fin ? aMinutos(form.fin) - aMinutos(form.inicio) : 0))
 const error = computed(() => {
+  if (!materia.value) return 'Elegí una materia.'
   if (!form.fecha) return 'Elegí una fecha.'
   if (!form.inicio || !form.fin) return 'Completá la hora de inicio y de fin.'
   if (minutos.value <= 0) return 'La hora de fin tiene que ser posterior a la de inicio.'

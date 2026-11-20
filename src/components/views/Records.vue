@@ -157,7 +157,7 @@ function vaciar() {
       </div>
     </template>
 
-    <EditorRegistro v-model:abierto="editorAbierto" :sesion="editando" :materias="store.materias" @guardar="guardar" />
+    <EditorRegistro v-model:abierto="editorAbierto" :sesion="editando" :materias="store.materiasDeCarrera" @guardar="guardar" />
 
     <Modal
       v-model:abierto="confirmarAbierto"
@@ -188,7 +188,10 @@ function vaciar() {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  box-sizing: border-box;
+  width: 100%;
   max-width: 760px;
+  min-width: 0;
   margin: 0 auto;
 }
 
@@ -196,10 +199,12 @@ function vaciar() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .titulos {
   flex: 1;
+  min-width: 0;
 }
 
 .titulos h2 {
@@ -217,9 +222,14 @@ function vaciar() {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  min-width: 0;
+  width: 100%;
 }
 
 .grupo {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
   padding: 0.75rem 1rem;
 }
 
@@ -241,6 +251,7 @@ function vaciar() {
 .sesiones {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -250,8 +261,11 @@ function vaciar() {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
   padding: 0.55rem 0.5rem;
-  margin: 0 -0.5rem;
+  margin: 0;
   border-top: 1px solid var(--border);
   border-radius: 10px;
   transition: background-color 0.6s ease;
@@ -274,8 +288,9 @@ function vaciar() {
 }
 
 .info {
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
+  max-width: 100%;
 }
 
 .info p {
@@ -293,7 +308,9 @@ function vaciar() {
 
 .meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.35rem;
+  min-width: 0;
   font-size: 0.8rem;
 }
 
@@ -306,6 +323,7 @@ function vaciar() {
 .botones {
   display: flex;
   flex: none;
+  gap: 0.15rem;
 }
 
 .borrar:hover {
@@ -317,6 +335,7 @@ function vaciar() {
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .vaciar {
