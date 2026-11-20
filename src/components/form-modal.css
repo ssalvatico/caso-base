@@ -169,17 +169,6 @@
   gap: 0.5rem;
 }
 
-.btn-primario {
-  padding: 0.4rem 1.1rem;
-  border: none;
-  border-radius: var(--radio-control);
-  background: var(--text-h);
-  color: var(--bg);
-  font: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
 .btn-primario:disabled {
   opacity: 0.5;
   cursor: not-allowed;

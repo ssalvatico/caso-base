@@ -609,10 +609,10 @@ function contadorTexto(cantidad: number) {
   height: 32px;
   flex-shrink: 0;
   padding: 0;
-  border: 1.5px solid var(--trazo);
+  border: 1.5px solid var(--accent-border);
   border-radius: var(--radio-control);
   background: transparent;
-  color: var(--text);
+  color: var(--accent);
   cursor: pointer;
   opacity: 0.5;
   transition: opacity 0.15s, border-color 0.15s;
@@ -632,10 +632,10 @@ function contadorTexto(cantidad: number) {
   height: 32px;
   flex-shrink: 0;
   padding: 0;
-  border: 1.5px solid var(--trazo);
+  border: 1.5px solid var(--accent-border);
   border-radius: var(--radio-control);
   background: transparent;
-  color: var(--text);
+  color: var(--accent);
   cursor: pointer;
   opacity: 0.5;
   transition: opacity 0.15s, border-color 0.15s, color 0.15s;

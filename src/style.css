@@ -167,17 +167,18 @@ h3 {
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.2;
-  box-shadow: 0 2px 0 var(--trazo);
+  box-shadow: 0 3px 0 var(--trazo), 0 6px 10px -6px rgba(0, 0, 0, 0.35);
+  margin-block: 0.25rem;
   cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
-.btn:hover:not(:disabled) { border-color: var(--text-h); box-shadow: 0 2px 0 var(--text-h); }
+.btn:hover:not(:disabled) { border-color: var(--text-h); box-shadow: 0 3px 0 var(--text-h), 0 6px 10px -6px rgba(0, 0, 0, 0.35); }
 .btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 var(--trazo); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn:focus-visible,
 .pildora:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.btn-primario { background: var(--accent); border-color: var(--text-h); color: var(--on-accent); box-shadow: 0 2px 0 var(--text-h); }
-.btn-primario:hover:not(:disabled) { border-color: var(--text-h); background: color-mix(in srgb, var(--accent) 88%, #fff); }
+.btn-primario { background: var(--accent); border-color: var(--accent-text); color: var(--on-accent); box-shadow: 0 3px 0 var(--accent-text), 0 6px 10px -6px rgba(0, 0, 0, 0.35); }
+.btn-primario:hover:not(:disabled) { border-color: var(--accent-text); background: color-mix(in srgb, var(--accent) 88%, #fff); box-shadow: 0 3px 0 var(--accent-text), 0 6px 10px -6px rgba(0, 0, 0, 0.35); }
 .btn-peligro { background: var(--peligro); border-color: var(--peligro); color: #fff; box-shadow: 0 2px 0 color-mix(in srgb, var(--peligro) 60%, #000); }
 .btn-secundario:disabled, .btn-peligro:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-peligro:hover:not(:disabled) { border-color: var(--text-h); box-shadow: 0 2px 0 var(--text-h); }
