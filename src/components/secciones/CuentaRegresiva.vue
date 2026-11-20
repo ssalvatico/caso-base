@@ -49,7 +49,7 @@ const textoAccesible = computed(
   gap: 0.5rem;
   padding: 0.75rem;
   border: 1px solid color-mix(in srgb, var(--tono) 45%, transparent);
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   background: color-mix(in srgb, var(--tono) 12%, transparent);
   transition: background-color 0.4s, border-color 0.4s;
 }
@@ -83,7 +83,7 @@ const textoAccesible = computed(
   align-items: center;
   gap: 0.125rem;
   padding: 0.5rem 0.25rem;
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   background: var(--bg);
 }
 

@@ -1,5 +1,6 @@
 exportado.sql
 scripts/exportar-api.mjs
+supabase/.cli_token
 # Logs
 .env
 logs

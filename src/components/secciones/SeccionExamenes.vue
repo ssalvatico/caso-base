@@ -198,7 +198,7 @@ function agregar() {
   gap: 0.75rem;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radio-control);
 }
 
 .item-texto {
@@ -257,7 +257,7 @@ function agregar() {
 .campo select {
   padding: 0.5rem;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   background: var(--bg);
   color: var(--text-h);
   font: inherit;
@@ -275,7 +275,7 @@ function agregar() {
 
 .agregar,
 .quitar {
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   font: inherit;
   font-size: 14px;
   cursor: pointer;

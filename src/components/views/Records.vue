@@ -267,7 +267,7 @@ function vaciar() {
   padding: 0.55rem 0.5rem;
   margin: 0;
   border-top: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   transition: background-color 0.6s ease;
 }
 

@@ -127,7 +127,7 @@ ul {
   flex: none;
   width: 1.25rem;
   height: 1.25rem;
-  border-radius: 6px;
+  border-radius: var(--radio-control);
 }
 
 .nombre {

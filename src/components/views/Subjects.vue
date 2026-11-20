@@ -455,7 +455,7 @@ function contadorTexto(cantidad: number) {
   z-index: 10;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   padding: 0.25rem;
   display: flex;
   flex-direction: column;
@@ -470,7 +470,7 @@ function contadorTexto(cantidad: number) {
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radio-control);
   background: transparent;
   color: var(--text);
   font: inherit;
@@ -551,7 +551,7 @@ function contadorTexto(cantidad: number) {
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   transition: border-color 0.2s, background-color 0.2s;
 }
 
@@ -605,12 +605,12 @@ function contadorTexto(cantidad: number) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
   padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1.5px solid var(--trazo);
+  border-radius: var(--radio-control);
   background: transparent;
   color: var(--text);
   cursor: pointer;
@@ -628,12 +628,12 @@ function contadorTexto(cantidad: number) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
   padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1.5px solid var(--trazo);
+  border-radius: var(--radio-control);
   background: transparent;
   color: var(--text);
   cursor: pointer;
@@ -649,8 +649,8 @@ function contadorTexto(cantidad: number) {
 
 .selector {
   padding: 4px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1.5px solid var(--trazo);
+  border-radius: var(--radio-control);
   background: var(--bg);
   color: var(--text-h);
   font: inherit;
@@ -750,7 +750,7 @@ function contadorTexto(cantidad: number) {
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 1rem;
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   font: inherit;
   font-size: 0.875rem;
   font-weight: 500;
@@ -844,7 +844,7 @@ function contadorTexto(cantidad: number) {
 .input {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   background: var(--bg);
   color: var(--text-h);
   font: inherit;
@@ -863,7 +863,7 @@ function contadorTexto(cantidad: number) {
 .btn-primario {
   padding: 0.4rem 1.1rem;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   background: var(--text-h);
   color: var(--bg);
   font: inherit;
@@ -872,37 +872,6 @@ function contadorTexto(cantidad: number) {
 }
 
 .btn-primario:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-secundario {
-  padding: 0.4rem 1.1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text);
-  font: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.btn-secundario:hover {
-  border-color: var(--text);
-}
-
-.btn-peligro {
-  padding: 0.4rem 1.1rem;
-  border: none;
-  border-radius: 8px;
-  background: #e5484d;
-  color: #fff;
-  font: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.btn-peligro:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

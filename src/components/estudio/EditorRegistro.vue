@@ -135,7 +135,7 @@ function guardar() {
 .duracion {
   margin: 0;
   padding: 0.6rem 0.75rem;
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   background: var(--surface);
   font-size: 0.875rem;
   color: var(--text);

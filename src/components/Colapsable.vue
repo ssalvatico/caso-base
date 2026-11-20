@@ -64,7 +64,7 @@ const abierto = ref(false)
 <style scoped>
 .colapsable {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   transition: border-color 0.2s, background-color 0.2s;
 }
 
@@ -84,7 +84,7 @@ const abierto = ref(false)
   width: 100%;
   padding: 0.75rem 1rem;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   background: transparent;
   color: var(--text-h);
   font: inherit;

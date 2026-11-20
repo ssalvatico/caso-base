@@ -68,7 +68,7 @@ const descripcionAccesible = computed(() => {
   padding: 10px 12px;
   background: color-mix(in srgb, var(--tono) 30%, var(--bg));
   border: 2px solid var(--tono);
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   box-shadow: 0 1px 2px rgba(20, 33, 61, 0.12);
   text-align: left;
   transition: opacity 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;

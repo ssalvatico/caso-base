@@ -89,7 +89,7 @@ provide("navegar", (tab: string) => {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 2px solid var(--text-h);
 }
 
 .app-brand {
@@ -102,7 +102,7 @@ provide("navegar", (tab: string) => {
   display: flex;
   padding: 0;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   background: transparent;
   cursor: pointer;
 }
@@ -122,8 +122,10 @@ provide("navegar", (tab: string) => {
 .app-title {
   margin: 0;
   font-family: "Monocraft", ui-monospace, monospace;
+  font-size: 1.5rem;
   font-weight: 400;
   letter-spacing: 0;
+  color: var(--text-h);
 }
 
 .app-acciones {
@@ -137,8 +139,8 @@ provide("navegar", (tab: string) => {
   align-items: center;
   gap: 0.375rem;
   padding: 0.375rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  border: 1.5px solid var(--trazo);
+  border-radius: var(--radio-control);
   background: transparent;
   color: inherit;
   font-size: 0.875rem;

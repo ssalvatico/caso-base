@@ -44,7 +44,7 @@
   height: 32px;
   padding: 0;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radio-control);
   background: transparent;
   color: var(--text);
   cursor: pointer;
@@ -90,7 +90,7 @@
 .input {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   background: var(--bg);
   color: var(--text-h);
   font: inherit;
@@ -116,7 +116,7 @@
   max-height: 180px;
   overflow-y: auto;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   padding: 0.5rem;
 }
 
@@ -172,7 +172,7 @@
 .btn-primario {
   padding: 0.4rem 1.1rem;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   background: var(--text-h);
   color: var(--bg);
   font: inherit;
@@ -181,37 +181,6 @@
 }
 
 .btn-primario:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-secundario {
-  padding: 0.4rem 1.1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text);
-  font: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.btn-secundario:hover {
-  border-color: var(--text);
-}
-
-.btn-peligro {
-  padding: 0.4rem 1.1rem;
-  border: none;
-  border-radius: 8px;
-  background: #e5484d;
-  color: #fff;
-  font: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.btn-peligro:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -246,7 +215,7 @@
   justify-content: space-between;
   padding: 0.4rem 0.6rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radio-control);
   font-size: 0.85rem;
 }
 

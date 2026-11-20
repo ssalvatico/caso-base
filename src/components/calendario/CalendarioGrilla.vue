@@ -411,7 +411,7 @@ function etiqueta(e: EventoCalendario): string {
   padding: 4px 6px;
   overflow: hidden;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radio-control);
   background: hsl(var(--hue) 55% 40%);
   color: #fff;
   font: inherit;
@@ -510,7 +510,7 @@ function etiqueta(e: EventoCalendario): string {
   padding: 6px 8px;
   border: 1px solid var(--border);
   border-left: 3px solid var(--color);
-  border-radius: 6px;
+  border-radius: var(--radio-control);
   background: var(--bg);
   box-shadow: 0 4px 14px rgb(0 0 0 / 0.25);
   color: var(--text-h);

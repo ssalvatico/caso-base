@@ -79,7 +79,7 @@ onMounted(() => store.cargarOverview(props.materia.id))
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border: 1px dashed var(--border);
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
 }
 
 .seccion-titulo {

@@ -134,7 +134,7 @@ h4 {
 .alerta {
   margin: 0;
   padding: 0.5rem 0.75rem;
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   background: var(--aviso-fondo);
   color: var(--aviso-texto);
 }

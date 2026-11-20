@@ -61,7 +61,7 @@ const emit = defineEmits<{
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border: 1px solid var(--aviso-borde);
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   background: var(--aviso-fondo);
   color: var(--aviso-texto);
   font-size: 14px;

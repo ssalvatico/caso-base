@@ -154,7 +154,7 @@ hr {
 .linea-tiempo {
   position: relative;
   height: 1.75rem;
-  border-radius: 8px;
+  border-radius: var(--radio-control);
   background: var(--calor-0);
   overflow: hidden;
 }

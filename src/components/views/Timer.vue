@@ -459,7 +459,7 @@ const hoyPorMateria = computed(() => {
   gap: 0.3rem;
   padding: 0.25rem 0.5rem;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   background: transparent;
   color: var(--text-h);
   font: inherit;
@@ -516,7 +516,7 @@ const hoyPorMateria = computed(() => {
   width: 100%;
   padding: 0.6rem 0.75rem;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   background: transparent;
   font: inherit;
   text-align: left;
